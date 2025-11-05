@@ -159,6 +159,7 @@ export const NewClipDialog = ({
                       />
                     ) : (
                       <Input
+                    
                         placeholder={
                           selectedType === "image"
                             ? "Enter image URL or file name..."

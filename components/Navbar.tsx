@@ -21,10 +21,8 @@ const Navbar = () => {
     isFavorite: boolean;
   }) => {
     const newClip = {
-      id: String(Date.now()),
       content: data.content,
       type: data.type,
-      timestamp: "Just now",
       isFavorite: data.isFavorite,
     };
     handleAddNew(newClip);

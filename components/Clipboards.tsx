@@ -70,37 +70,36 @@ const mockClipboardItems = [
 
 const Clipboards = () => {
   const [clipboardText, setClipboardText] = useState("");
-  const [clipboardItems, setClipboardItems] = useState(mockClipboardItems);
   const clipboards = useClipboardStore((state) => state.clipboards);
   const handleAddNew = useClipboardStore((state) => state.handleAddNew);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
+//   useEffect(() => {
+//     let interval: NodeJS.Timeout;
 
-    function startPolling() {
-      interval = setInterval(async () => {
-        try {
-          const text = await navigator.clipboard.readText();
-          if (text && text !== clipboardText) handleAddNew({content: text});
-        } catch {}
-      }, 2000);
-    }
+//     function startPolling() {
+//       interval = setInterval(async () => {
+//         try {
+//           const text = await navigator.clipboard.readText();
+//           if (text && text !== clipboardText) handleAddNew({content: text});
+//         } catch {}
+//       }, 2000);
+//     }
 
-    function stopPolling() {
-      clearInterval(interval);
-    }
+//     function stopPolling() {
+//       clearInterval(interval);
+//     }
 
-    window.addEventListener("focus", startPolling);
-    window.addEventListener("blur", stopPolling);
+//     window.addEventListener("focus", startPolling);
+//     window.addEventListener("blur", stopPolling);
 
-    startPolling();
+//     startPolling();
 
-    return () => {
-      window.removeEventListener("focus", startPolling);
-      window.removeEventListener("blur", stopPolling);
-      clearInterval(interval);
-    };
-  }, [clipboardText]);
+//     return () => {
+//       window.removeEventListener("focus", startPolling);
+//       window.removeEventListener("blur", stopPolling);
+//       clearInterval(interval);
+//     };
+//   }, [clipboardText]);
 
   return (
     <div className="px-4 lg:px-6">

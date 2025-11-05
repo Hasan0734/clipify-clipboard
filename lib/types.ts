@@ -2,7 +2,7 @@ export type ClipboardType = {
     id: string,
     type:  "text" | "image" | "link",
     content:string,
-    timestamp:string,
+    timestamp:Date,
     isFavorite: boolean
 }
 
