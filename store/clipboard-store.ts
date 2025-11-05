@@ -1,9 +1,7 @@
-"use client";
-import React, { Suspense, useEffect, useState } from "react";
-import ClipboardCard from "./ClipboardCard";
-import { useClipboardStore } from "@/store/clipboard-store";
+import { ClipboardType } from "@/lib/types";
+import { create } from "zustand";
 
-const mockClipboardItems = [
+const mockClipboardItems: ClipboardType[] = [
   {
     id: "1",
     type: "text" as const,
@@ -65,40 +63,28 @@ const mockClipboardItems = [
   },
 ];
 
-const Clipboards = () => {
-  const [clipboardText, setClipboardText] = useState("");
-  const [clipboardItems, setClipboardItems] = useState(mockClipboardItems);
-    const clipboards = useClipboardStore(state => state.clipboards);
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const text = await navigator.clipboard.readText();
-        const image = await navigator.clipboard.read();
-
-        setClipboardText(text);
-      } catch (error) {
-        console.warn("Clipboard access denied:", error);
-      }
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [clipboardText]);
-
-
-
-
-  
-
-  return (
-    <div className="px-4 lg:px-6">
-      <h2 className=" mb-4">3 items</h2>
-      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-liner-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid-rows-4">
-        {clipboards.map((item) => (
-          <ClipboardCard key={item.id} data={item} />
-        ))}
-      </div>
-    </div>
-  );
+type ClipboardStore = {
+  clipboards: ClipboardType[];
+  toggleFavorite: (id: string) => void;
+  handleFilter: (type: string) => void;
 };
 
-export default Clipboards;
+export const useClipboardStore = create<ClipboardStore>((set) => ({
+  clipboards: mockClipboardItems,
+  toggleFavorite: (id: string) => {
+    set((state) => ({
+      clipboards: state.clipboards.map((item) =>
+        item.id === id ? { ...item, isFavorite: !item.isFavorite } : item
+      ),
+    }));
+  },
+  handleFilter: (type) => {
+    console.log(type)
+    set((state) => ({
+      clipboards:
+        type === "all"
+          ? mockClipboardItems
+          : state.clipboards.filter((item) => item.type === type),
+    }));
+  },
+}));

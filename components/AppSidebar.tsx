@@ -13,17 +13,27 @@ import {
 } from "@/components/ui/sidebar";
 import { FileText, Image, Link2, Star, Layers, Clipboard } from "lucide-react";
 import { useState } from "react";
+import { useClipboardStore } from "@/store/clipboard-store";
 
 const filters = [
   { id: "all", label: "All Clips", icon: Layers, count: 212 },
   { id: "text", label: "Text", icon: FileText, count: 33 },
-  { id: "images", label: "Images", icon: Image, count: 11 },
-  { id: "links", label: "Links", icon: Link2, count: 2 },
-  { id: "favorites", label: "Favorites", icon: Star, count: 4 },
+  { id: "image", label: "Images", icon: Image, count: 11 },
+  { id: "link", label: "Links", icon: Link2, count: 2 },
+  { id: "favorite", label: "Favorites", icon: Star, count: 4 },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isActive, setIsActive] = useState("all");
+  const {clipboards, handleFilter} = useClipboardStore((state) => state);
+
+  const itemCounts = {
+    all: clipboards.length,
+    text: clipboards.filter((item) => item.type === "text").length,
+    image: clipboards.filter((item) => item.type === "image").length,
+    link: clipboards.filter((item) => item.type === "link").length,
+    favorite: clipboards.filter((item) => item.isFavorite).length,
+  };
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -45,24 +55,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Filters</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {filters.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton
-                    size={"lg"}
-                    onClick={() => {
-                      setIsActive(item.id);
-                    }}
-                    isActive={isActive === item.id}
-                    className={"rounded-md  cursor-pointer w-full  h-10"}
-                  >
-                    {<item.icon />}
-                    <div className={"grow flex justify-between "}>
-                      {item.label}{" "}
-                      <span className={"font-semibold"}>{item.count}</span>
-                    </div>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {filters.map((item) => {
+                const count = itemCounts[item.id as keyof typeof itemCounts];
+                const active = isActive === item.id;
+
+                return (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton
+                      size={"lg"}
+                      onClick={() => {
+                        handleFilter(item.id);
+                      }}
+                      isActive={active}
+                      className={"rounded-md  cursor-pointer w-full  h-10"}
+                    >
+                      {<item.icon />}
+                      <div className={"grow flex justify-between "}>
+                        {item.label}{" "}
+                        <span className={"font-semibold"}>{count}</span>
+                      </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
