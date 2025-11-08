@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import Image from "next/image";
-import { ClipboardType } from "@/lib/types";
+import { ClipboardItem } from "@/lib/types";
 import { useClipboardStore } from "@/store/clipboard-store";
 import { formatDistance } from "date-fns";
 import {
@@ -29,12 +29,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "./ui/dialog";
-
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { writeText } from "tauri-plugin-clipboard-api";
 
 const typeIcons = {
   text: FileText,
@@ -42,7 +38,7 @@ const typeIcons = {
   link: Link2,
 } as const;
 
-const ClipboardCard = ({ data }: { data: ClipboardType }) => {
+const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
   const toggleFavorite = useClipboardStore((state) => state.toggleFavorite);
   const deleteClipboard = useClipboardStore((state) => state.deleteClipboard);
 
@@ -50,8 +46,8 @@ const ClipboardCard = ({ data }: { data: ClipboardType }) => {
 
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(data.content);
+  const handleCopy = async () => {
+    await writeText(data.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -94,15 +90,19 @@ const ClipboardCard = ({ data }: { data: ClipboardType }) => {
                   <Eye className={`w-5 h-5 transition-colors `} />
                 </button>
               </DialogTrigger>
+
               <DialogContent>
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Icon className="w-5 h-5 text-primary" />
+                <DialogTitle>
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium capitalize">
+                      {data.type}
+                    </span>
                   </div>
-                  <span className="text-sm font-medium capitalize">
-                    {data.type}
-                  </span>
-                </div>
+                </DialogTitle>
+
                 <div className="min-h-32">
                   {data.type === "text" ? (
                     <p className="dark:text-gray-400 text-base line-clamp-5 wrap-break-word">
@@ -132,7 +132,7 @@ const ClipboardCard = ({ data }: { data: ClipboardType }) => {
                 </div>
                 <div className="flex items-center justify-between w-full text-sm border-t pt-3">
                   <p className="text-muted-foreground">
-                    {formatDistance(data.timestamp, new Date(), {
+                    {formatDistance(data.createdAt, new Date(), {
                       addSuffix: true,
                     })}
                   </p>
@@ -208,7 +208,7 @@ const ClipboardCard = ({ data }: { data: ClipboardType }) => {
       <CardFooter className=" mt-auto flex justify-between  w-full text-sm border-t pt-2!">
         <div className="flex items-center justify-between w-full text-sm">
           <p className="text-muted-foreground">
-            {formatDistance(data.timestamp, new Date(), {
+            {formatDistance(data.createdAt, new Date(), {
               addSuffix: true,
             })}
           </p>

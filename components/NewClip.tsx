@@ -79,7 +79,6 @@ export const NewClipDialog = ({
   };
 
   const selectedType = form.watch("type");
-  console.log(selectedType)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,7 +116,7 @@ export const NewClipDialog = ({
                       className="grid grid-cols-3 gap-4"
                     >
                       {items.map((item) => (
-                        <div>
+                        <div key={item.value}>
                           <RadioGroupItem
                             value={item.value}
                             id={item.value}

@@ -3,115 +3,69 @@ import React, { useEffect, useState } from "react";
 import ClipboardCard from "./ClipboardCard";
 import { useClipboardStore } from "@/store/clipboard-store";
 import { Button } from "./ui/button";
-import { Calendar, SortAsc } from "lucide-react";
+import { Calendar, Clipboard, SortAsc, Trash } from "lucide-react";
 import SearchBar from "./SearchBar";
+import clipboard, {
+  clear,
+  isMonitorRunning,
+  startMonitor,
+  stopMonitor,
+} from "tauri-plugin-clipboard-api";
 
-const mockClipboardItems = [
-  {
-    id: "1",
-    type: "text" as const,
-    content:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. sdf asf ads asdf sdf asdfsafdsf asd sdf adsf asf daf das fdaf asdf asdf asdfds fdfd fasdf af saddf  sdf sdfa fafa",
-    timestamp: "2 hours ago",
-    isFavorite: true,
-  },
-  {
-    id: "2",
-    type: "link" as const,
-    content: "https://www.example.com/amazing-article-about-productivity",
-    timestamp: "5 hours ago",
-    isFavorite: false,
-  },
-  {
-    id: "3",
-    type: "image" as const,
-    content: "/assets/sample-image.jpg",
-    timestamp: "Yesterday",
-    isFavorite: true,
-  },
-  {
-    id: "4",
-    type: "text" as const,
-    content:
-      "Remember to buy: eggs, milk, bread, coffee, and fruits from the grocery store tomorrow morning. sdfa sdf asdfasf fdsfasd fasdf asfasdfasfds f dsf dsfsafads",
-    timestamp: "Yesterday",
-    isFavorite: false,
-  },
-  {
-    id: "5",
-    type: "link" as const,
-    content: "https://github.com/awesome-project/repository",
-    timestamp: "2 days ago",
-    isFavorite: false,
-  },
-  {
-    id: "6",
-    type: "text" as const,
-    content:
-      "Meeting notes: Discussed Q4 goals, new product launch timeline, and team expansion plans.",
-    timestamp: "3 days ago",
-    isFavorite: true,
-  },
-  {
-    id: "7",
-    type: "image" as const,
-    content: "design_mockup.png",
-    timestamp: "3 days ago",
-    isFavorite: false,
-  },
-  {
-    id: "8",
-    type: "link" as const,
-    content: "https://docs.example.com/api/reference",
-    timestamp: "1 week ago",
-    isFavorite: false,
-  },
-];
+import ClipboardMonitor from "@/components/ClipboardMonitor";
+import { useClipboardMonitor } from "./useClipboardMonitor";
+import {
+  startListening,
+  stopMonitor as stopListening,
+  onClipboardUpdate,
+  onTextUpdate,
+  hasText,
+} from "tauri-plugin-clipboard-api";
+import { useClipboardStore2 } from "@/store/useClipboardStore";
+import { AlertDialog, AlertDialogTrigger } from "./ui/alert-dialog";
+import ClearAlert from "./ClearAlert";
+
+import { register } from "@tauri-apps/plugin-global-shortcut";
+import { useFocusedPasteListener } from "@/lib/hooks/useFocusedPasteListener";
 
 const Clipboards = () => {
-  const [clipboardText, setClipboardText] = useState("");
-  const { clipboards, handleAddNew, isMonitoring } = useClipboardStore(
-    (state) => state
-  );
+  const addNew = useClipboardStore2((st) => st.addItem);
+  const { items, fetchItems } = useClipboardStore2((st) => st);
+  useFocusedPasteListener();
+
+  async function handlePaste() {
+    console.log(await isMonitorRunning());
+    // await clipboard.writeText("Tauri is awesome!");
+    // console.log(await clipboard.readText(), "Tauri is awesome!");
+  }
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    const init = async () => {
+      await clear();
+      await startListening();
+      
 
-    function startPolling() {
-      interval = setInterval(async () => {
-        try {
-          const text = await navigator.clipboard.readText();
-          console.log({ isMonitoring });
-          console.log({
-            check: text && text !== clipboardText && isMonitoring,
-          });
-          if (text && text !== clipboardText && isMonitoring) {
-            setClipboardText(text);
-            handleAddNew({ content: text });
-          }
-        } catch {}
-      }, 2000);
-    }
+      await onTextUpdate((text) => {
+        const newClip = {
+          content: text,
+        };
+        addNew(newClip);
+      });
+    };
 
-    function stopPolling() {
-      clearInterval(interval);
-    }
-
-    window.addEventListener("focus", startPolling);
-    window.addEventListener("blur", stopPolling);
-
-    startPolling();
+    init();
 
     return () => {
-      window.removeEventListener("focus", startPolling);
-      window.removeEventListener("blur", stopPolling);
-      clearInterval(interval);
+      init();
     };
-  }, [clipboardText, isMonitoring]);
+  }, []);
 
-  const reversed = [...clipboards.reverse()];
+  useEffect(() => {
+    fetchItems();
+  }, []);
 
-  console.log(reversed)
+
+
   return (
     <div className="px-4 lg:px-6">
       <div className="flex items-center justify-center  mb-10">
@@ -119,20 +73,31 @@ const Clipboards = () => {
 
         <div className="space-x-2 flex ">
           <SearchBar />
-          <Button variant={"outline"}>
+          <Button onClick={handlePaste} variant={"outline"}>
             Sort by <SortAsc />
           </Button>
           <Button variant={"outline"}>
             By Date <Calendar />
           </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant={"outline"}>Clear All</Button>
+            </AlertDialogTrigger>
+            <ClearAlert />
+          </AlertDialog>
         </div>
       </div>
 
       <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-liner-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-3 @7xl/main:grid-cols-4">
-        {clipboards.length > 0 ? (
-          reversed.map((item) => <ClipboardCard key={item.id} data={item} />)
+        {items.length > 0 ? (
+          items
+            .reverse()
+            .map((item) => <ClipboardCard key={item.id} data={item} />)
         ) : (
-          <div>Not found any items</div>
+          <div className="flex items-center flex-col gap-6 col-span-full row-span-16 text-center justify-center">
+            <Clipboard size={50} />
+            <div>No clipboard data. Enable monitoring to auto-save.</div>
+          </div>
         )}
       </div>
     </div>

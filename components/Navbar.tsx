@@ -1,6 +1,6 @@
 "use client";
 import { Clipboard, PauseCircle, PlayCircle, Plus } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -8,13 +8,38 @@ import { Separator } from "@/components/ui/separator";
 import { useClipboardStore } from "@/store/clipboard-store";
 import { NewClipDialog } from "./NewClip";
 import { toast } from "sonner";
+import { useClipboardStore2 } from "@/store/useClipboardStore";
+import { clear, isMonitorRunning, startListening, stopMonitor } from "tauri-plugin-clipboard-api";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [isMonitoring, setIsMonitoring] = useState(false);
 
-  const { isMonitoring, handleMonitor, handleAddNew } = useClipboardStore(
-    (state) => state
-  );
+  const { handleAddNew } = useClipboardStore((state) => state);
+
+  const addItem = useClipboardStore2((st) => st.addItem);
+
+  useEffect(() => {
+    const monitor = async () => {
+      const isMn = await isMonitorRunning();
+      setIsMonitoring(isMn);
+      console.log({isMn})
+    };
+
+    monitor();
+  }, [isMonitoring]);
+
+  const handleMonitor = async () => {
+    const isMn = await isMonitorRunning(); 
+    if (!isMn) {
+      await clear();
+      await startListening();
+      return;
+    }
+    await clear();
+    await stopMonitor()
+
+  };
 
   const handleCreateClip = (data: {
     content: string;
@@ -26,7 +51,8 @@ const Navbar = () => {
       type: data.type,
       isFavorite: data.isFavorite,
     };
-    handleAddNew(newClip);
+    // handleAddNew(newClip);
+    addItem(newClip);
     toast("Clip created!", {
       description: "Your new clip has been added successfully.",
     });

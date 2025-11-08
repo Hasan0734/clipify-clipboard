@@ -3,6 +3,7 @@ import React from "react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -11,9 +12,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { FileText, Image, Link2, Star, Layers, Clipboard } from "lucide-react";
-import { useState } from "react";
+import { FileText, Link2, Star, Layers, ClipboardList } from "lucide-react";
 import { useClipboardStore } from "@/store/clipboard-store";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 
 const filters = [
   { id: "all", label: "All Clips", icon: Layers, count: 212 },
@@ -24,9 +25,8 @@ const filters = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { clipboards, allClipboards, filterType, handleFilter } = useClipboardStore(
-    (state) => state
-  );
+  const { clipboards, allClipboards, filterType, handleFilter } =
+    useClipboardStore((state) => state);
 
   const itemCounts = {
     all: allClipboards.length,
@@ -39,9 +39,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="p-2 rounded-xl shadow-lg">
-            <Clipboard className="w-6 h-6 text-primary dark:text-white" />
+            <ClipboardList className="w-6 h-6 text-primary dark:text-white" />
           </div>
           <div>
             <h1 className="text-2xl font-bold dark:text-white text-primary">
@@ -94,6 +94,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <div className="flex items-center justify-center">
+          <KbdGroup>
+            <Kbd>⌘</Kbd>
+            <span>+</span>
+            <Kbd>V</Kbd>
+          </KbdGroup>
+          <span className="text-muted-foreground px-3">or</span>
+          <KbdGroup>
+            <Kbd>Ctrl</Kbd>
+            <span>+</span>
+            <Kbd>V</Kbd>
+          </KbdGroup>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }
