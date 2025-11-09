@@ -8,21 +8,23 @@ type Screen = "welcome" | "setup" | "lock" | "clipboard";
 type AppStore = {
   screen: Screen;
   initialized: boolean;
-  pinExists: boolean;
 
   setScreen: (s: Screen) => void;
   initApp: () => Promise<void>;
   savePin: (pin: string) => Promise<void>;
   verifyPin: (pin: string) => Promise<boolean>;
   resetApp: () => Promise<void>;
+  handleWindowFocus: () => void;
+  handleWindowBlur: () => void;
 };
+
+let lockTimeout: NodeJS.Timeout | null = null;
 
 export const useAppStore = create<AppStore>()(
   persist(
     (set, get) => ({
       screen: "welcome",
       setScreen: (screen) => set({ screen }),
-      pinExists: false,
       initialized: false,
 
       initApp: async () => {
@@ -32,9 +34,8 @@ export const useAppStore = create<AppStore>()(
             "SELECT value FROM settings WHERE key='has_setup'"
           );
 
-          if (!row?.[0])
-            set({ screen: "welcome", pinExists: false, initialized: true });
-          else set({ screen: "lock", pinExists: true, initialized: true });
+          if (!row?.[0]) set({ screen: "welcome", initialized: true });
+          else set({ screen: "lock", initialized: true });
         } catch (error) {
           console.error("initApp error:", error);
           set({ screen: "setup", initialized: true });
@@ -53,7 +54,7 @@ export const useAppStore = create<AppStore>()(
           "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)",
           ["has_setup", "true"]
         );
-        set({ screen: "clipboard", pinExists: true });
+        set({ screen: "clipboard" });
       },
       verifyPin: async (pin: string) => {
         const db = await getDB();
@@ -70,14 +71,28 @@ export const useAppStore = create<AppStore>()(
         const db = await getDB();
         await db.execute("DELETE FROM clipboards");
         await db.execute("DELETE FROM settings");
-    set({ screen: "welcome", pinExists: false, initialized: true });
+        set({ screen: "welcome", initialized: true });
+        if (lockTimeout) clearTimeout(lockTimeout);
+      },
+      handleWindowFocus: () => {
+        if (lockTimeout) {
+          clearTimeout(lockTimeout);
+          lockTimeout = null;
+        }
+      },
+
+      handleWindowBlur: () => {
+        if (lockTimeout) clearTimeout(lockTimeout);
+        lockTimeout = setTimeout(() => {
+          const { screen,initialized, setScreen } = get();
+          if (screen === "clipboard" && initialized) {
+            setScreen("lock");
+          }
+        }, 1 * 60 * 1000); // 1 minutes
       },
     }),
     {
       name: "clipboard-app",
-      partialize: (state) => ({
-        pinExists: state.pinExists,
-      }),
     }
   )
 );

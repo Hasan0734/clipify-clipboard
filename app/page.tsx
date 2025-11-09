@@ -7,19 +7,21 @@ import { useAppStore } from "@/store/useAppStore";
 import { useEffect } from "react";
 
 export default function Home() {
-  const { screen, initApp, pinExists, initialized } = useAppStore();
-
-
-  console.log({screen, pinExists})
-  // useEffect(() => {
-
-  // },[])
+  const { screen, initApp, initialized, handleWindowFocus, handleWindowBlur } =
+    useAppStore();
 
   useEffect(() => {
     initApp();
-  }, [initApp]);
 
-  if(!initialized){
+    window.addEventListener("focus", handleWindowFocus);
+    window.addEventListener("blur", handleWindowBlur);
+
+    return () => {
+      window.removeEventListener("focus", handleWindowFocus);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [initApp, handleWindowFocus, handleWindowBlur]);
+  if (!initialized) {
     return null;
   }
 
