@@ -27,6 +27,10 @@ export async function getDB() {
         createdAt INTEGER
       )
     `);
+
+    await db.execute(`CREATE TABLE IF NOT EXISTS settings (
+     key TEXT PRIMARY KEY, value TEXT
+)`);
   }
   return db;
 }

@@ -3,7 +3,12 @@ import { create } from "zustand";
 import { generateShortId, isLink } from "@/lib/utils";
 import { persist } from "zustand/middleware";
 import { toast } from "sonner";
-import { startListening, stopMonitor, clear, startMonitor } from "tauri-plugin-clipboard-api";
+import {
+  startListening,
+  stopMonitor,
+  clear,
+  startMonitor,
+} from "tauri-plugin-clipboard-api";
 
 type ClipboardStore = {
   clipboards: ClipboardType[];
@@ -130,7 +135,7 @@ export const useClipboardStore = create<ClipboardStore>()(
       handleMonitor: async () => {
         const isMonitoring = get().isMonitoring;
         if (isMonitoring) {
-           await clear();
+          await clear();
           await stopMonitor();
           await clear();
         } else {

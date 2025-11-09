@@ -15,6 +15,19 @@ import {
 import { FileText, Link2, Star, Layers, ClipboardList } from "lucide-react";
 import { useClipboardStore } from "@/store/clipboard-store";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { Button } from "./ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useAppStore } from "@/store/useAppStore";
 
 const filters = [
   { id: "all", label: "All Clips", icon: Layers, count: 212 },
@@ -108,7 +121,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <Kbd>V</Kbd>
           </KbdGroup>
         </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild className="flex justify-center text-muted-foreground">
+            <Button variant={"ghost"} className="" size={"sm"}>
+              Reset app
+            </Button>
+          </AlertDialogTrigger>
+          <ResetDialog/>
+        </AlertDialog>
       </SidebarFooter>
     </Sidebar>
   );
 }
+
+const ResetDialog = () => {
+
+  const {resetApp} = useAppStore()
+
+  return (
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+        <AlertDialogDescription>
+          This action cannot be undone. This will permanently delete your
+          clipboards data from our servers.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogAction onClick={() => resetApp()}>
+          Continue
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  );
+};
