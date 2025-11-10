@@ -1,46 +1,21 @@
 "use client";
-import { Clipboard, PauseCircle, PlayCircle, Plus } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { Lock, PauseCircle, PlayCircle, Plus } from "lucide-react";
+import {useState } from "react";
 import { Button } from "./ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
-import { useClipboardStore } from "@/store/clipboard-store";
 import { NewClipDialog } from "./NewClip";
 import { toast } from "sonner";
-import { useClipboardStore2 } from "@/store/useClipboardStore";
-import { clear, isMonitorRunning, startListening, stopMonitor } from "tauri-plugin-clipboard-api";
+import { useClipboardStore } from "@/store/useClipboardStore";
+import { useAppStore } from "@/store/useAppStore";
+import { useMonitor } from "@/hooks/use-monitor";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
-  const [isMonitoring, setIsMonitoring] = useState(false);
-
-  const { handleAddNew } = useClipboardStore((state) => state);
-
-  const addItem = useClipboardStore2((st) => st.addItem);
-
-  useEffect(() => {
-    const monitor = async () => {
-      const isMn = await isMonitorRunning();
-      setIsMonitoring(isMn);
-      console.log({isMn})
-    };
-
-    monitor();
-  }, [isMonitoring]);
-
-  const handleMonitor = async () => {
-    const isMn = await isMonitorRunning(); 
-    if (!isMn) {
-      await clear();
-      await startListening();
-      return;
-    }
-    await clear();
-    await stopMonitor()
-
-  };
-
+  const addItem = useClipboardStore((st) => st.addItem);
+  const { isRunning, handleStartListen, handleStopListen } = useMonitor();
+  const { setScreen } = useAppStore();
   const handleCreateClip = (data: {
     content: string;
     type: "text" | "image" | "link";
@@ -53,9 +28,7 @@ const Navbar = () => {
     };
     // handleAddNew(newClip);
     addItem(newClip);
-    toast("Clip created!", {
-      description: "Your new clip has been added successfully.",
-    });
+  
   };
 
   return (
@@ -71,11 +44,13 @@ const Navbar = () => {
 
           <div className="ml-auto flex items-center gap-2">
             <Button
-              onClick={handleMonitor}
-              variant={isMonitoring ? "default" : "outline"}
+              onClick={() => {
+                isRunning ? handleStopListen() : handleStartListen();
+              }}
+              variant={isRunning ? "default" : "outline"}
               className="gap-2"
             >
-              {isMonitoring ? (
+              {isRunning ? (
                 <>
                   <PauseCircle className="w-4 h-4" />
                   <span className="hidden sm:inline">Monitoring</span>
@@ -96,6 +71,9 @@ const Navbar = () => {
               <span className="hidden sm:inline">New Clip</span>
             </Button>
             <ThemeToggle />
+            <Button variant={"ghost"} onClick={() => setScreen("lock")} size={"icon-sm"}>
+              <Lock />
+            </Button>
           </div>
         </div>
       </header>

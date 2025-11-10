@@ -3,11 +3,9 @@ import { useEffect, useState } from "react";
 import {
     startListening,
     stopMonitor,
-    onClipboardUpdate,
     onTextUpdate,
     listenToMonitorStatusUpdate,
     isMonitorRunning,
-    hasText,
 } from "tauri-plugin-clipboard-api";
 
 export default function ClipboardListener() {

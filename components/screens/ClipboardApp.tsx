@@ -1,4 +1,3 @@
-import React from "react";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "../AppSidebar";
 import Navbar from "../Navbar";

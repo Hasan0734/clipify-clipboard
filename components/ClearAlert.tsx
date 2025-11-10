@@ -1,5 +1,4 @@
 import {
-  AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
@@ -8,10 +7,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useClipboardStore2 } from "@/store/useClipboardStore";
+import { useClipboardStore } from "@/store/useClipboardStore";
 
 function ClearAlert() {
-  const { clearAll } = useClipboardStore2();
+  const { clearAll } = useClipboardStore();
   return (
     <AlertDialogContent>
       <AlertDialogHeader>

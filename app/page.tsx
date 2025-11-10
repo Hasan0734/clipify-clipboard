@@ -9,7 +9,7 @@ import { useEffect } from "react";
 export default function Home() {
   const { screen, initApp, initialized, handleWindowFocus, handleWindowBlur } =
     useAppStore();
-
+  
   useEffect(() => {
     initApp();
 
@@ -21,10 +21,13 @@ export default function Home() {
       window.removeEventListener("blur", handleWindowBlur);
     };
   }, [initApp, handleWindowFocus, handleWindowBlur]);
+
   if (!initialized) {
-    return null;
+    // Return loading state or null while app state is being determined
+    return null; 
   }
 
+  // 3. Use a switch statement for clean screen rendering
   switch (screen) {
     case "welcome":
       return <WelcomeScreen />;
@@ -37,6 +40,4 @@ export default function Home() {
     default:
       return null;
   }
-
-  // return <WelcomeScreen/>
 }

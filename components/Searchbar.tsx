@@ -1,10 +1,10 @@
 "use client";
 import { Search } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
-import { useClipboardStore } from "@/store/clipboard-store";
+import { useClipboardStore } from "@/store/useClipboardStore";
 
 const SearchBar = () => {
-  const { handleSearch, clipboards } = useClipboardStore((state) => state);
+  const { handleSearch, items } = useClipboardStore((state) => state);
 
   return (
     <div className="">
@@ -17,7 +17,7 @@ const SearchBar = () => {
           <Search />
         </InputGroupAddon>
         <InputGroupAddon align="inline-end">
-          {clipboards.length} results
+          {items.length} results
         </InputGroupAddon>
       </InputGroup>
     </div>

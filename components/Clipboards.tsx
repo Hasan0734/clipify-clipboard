@@ -1,70 +1,28 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ClipboardCard from "./ClipboardCard";
-import { useClipboardStore } from "@/store/clipboard-store";
 import { Button } from "./ui/button";
-import { Calendar, Clipboard, SortAsc, Trash } from "lucide-react";
+import { Calendar, Clipboard, SortAsc } from "lucide-react";
 import SearchBar from "./SearchBar";
-import clipboard, {
-  clear,
-  isMonitorRunning,
-  startMonitor,
-  stopMonitor,
-} from "tauri-plugin-clipboard-api";
+import { isMonitorRunning } from "tauri-plugin-clipboard-api";
 
-import ClipboardMonitor from "@/components/ClipboardMonitor";
-import { useClipboardMonitor } from "./useClipboardMonitor";
-import {
-  startListening,
-  stopMonitor as stopListening,
-  onClipboardUpdate,
-  onTextUpdate,
-  hasText,
-} from "tauri-plugin-clipboard-api";
-import { useClipboardStore2 } from "@/store/useClipboardStore";
 import { AlertDialog, AlertDialogTrigger } from "./ui/alert-dialog";
 import ClearAlert from "./ClearAlert";
 
-import { register } from "@tauri-apps/plugin-global-shortcut";
-import { useFocusedPasteListener } from "@/lib/hooks/useFocusedPasteListener";
+import { useClipboardStore } from "@/store/useClipboardStore";
+import { useFocusedPasteListener } from "@/hooks/useFocusedPasteListener";
 
 const Clipboards = () => {
-  const addNew = useClipboardStore2((st) => st.addItem);
-  const { items, fetchItems } = useClipboardStore2((st) => st);
+  const { items, fetchItems } = useClipboardStore((st) => st);
   useFocusedPasteListener();
 
   async function handlePaste() {
     console.log(await isMonitorRunning());
-    // await clipboard.writeText("Tauri is awesome!");
-    // console.log(await clipboard.readText(), "Tauri is awesome!");
   }
-
-  useEffect(() => {
-    const init = async () => {
-      await clear();
-      await startListening();
-      
-
-      await onTextUpdate((text) => {
-        const newClip = {
-          content: text,
-        };
-        addNew(newClip);
-      });
-    };
-
-    init();
-
-    return () => {
-      init();
-    };
-  }, []);
 
   useEffect(() => {
     fetchItems();
   }, []);
-
-
 
   return (
     <div className="px-4 lg:px-6">

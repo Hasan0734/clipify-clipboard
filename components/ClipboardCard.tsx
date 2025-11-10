@@ -21,7 +21,6 @@ import {
 import { Button } from "./ui/button";
 import Image from "next/image";
 import { ClipboardItem } from "@/lib/types";
-import { useClipboardStore } from "@/store/clipboard-store";
 import { formatDistance } from "date-fns";
 import {
   DropdownMenu,
@@ -31,6 +30,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { writeText } from "tauri-plugin-clipboard-api";
+import { useClipboardStore } from "@/store/useClipboardStore";
 
 const typeIcons = {
   text: FileText,
@@ -40,7 +40,7 @@ const typeIcons = {
 
 const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
   const toggleFavorite = useClipboardStore((state) => state.toggleFavorite);
-  const deleteClipboard = useClipboardStore((state) => state.deleteClipboard);
+  const deleteClipboard = useClipboardStore((state) => state.deleteItem);
 
   const Icon = typeIcons[data.type];
 

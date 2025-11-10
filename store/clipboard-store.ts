@@ -25,7 +25,7 @@ type ClipboardStore = {
   handleMonitor: () => void;
 };
 
-export const useClipboardStore = create<ClipboardStore>()(
+export const useClipboardStore3 = create<ClipboardStore>()(
   persist(
     (set, get) => ({
       allClipboards: [],

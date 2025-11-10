@@ -13,7 +13,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { FileText, Link2, Star, Layers, ClipboardList } from "lucide-react";
-import { useClipboardStore } from "@/store/clipboard-store";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Button } from "./ui/button";
 import {
@@ -28,6 +27,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAppStore } from "@/store/useAppStore";
+import { useClipboardStore } from "@/store/useClipboardStore";
 
 const filters = [
   { id: "all", label: "All Clips", icon: Layers, count: 212 },
@@ -38,15 +38,15 @@ const filters = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { clipboards, allClipboards, filterType, handleFilter } =
-    useClipboardStore((state) => state);
-
+  // const { clipboards, allClipboards, filterType, handleFilter } =
+  //   useClipboardStore((state) => state);
+  const { filterType, handleFilter } = useClipboardStore();
   const itemCounts = {
-    all: allClipboards.length,
-    text: allClipboards.filter((item) => item.type === "text").length,
-    // image: allClipboards.filter((item) => item.type === "image").length,
-    link: allClipboards.filter((item) => item.type === "link").length,
-    favorite: allClipboards.filter((item) => item.isFavorite).length,
+    // all: allClipboards.length,
+    // text: allClipboards.filter((item) => item.type === "text").length,
+    // // image: allClipboards.filter((item) => item.type === "image").length,
+    // link: allClipboards.filter((item) => item.type === "link").length,
+    // favorite: allClipboards.filter((item) => item.isFavorite).length,
   };
 
   return (
@@ -122,12 +122,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </KbdGroup>
         </div>
         <AlertDialog>
-          <AlertDialogTrigger asChild className="flex justify-center text-muted-foreground">
+          <AlertDialogTrigger
+            asChild
+            className="flex justify-center text-muted-foreground"
+          >
             <Button variant={"ghost"} className="" size={"sm"}>
               Reset app
             </Button>
           </AlertDialogTrigger>
-          <ResetDialog/>
+          <ResetDialog />
         </AlertDialog>
       </SidebarFooter>
     </Sidebar>
@@ -135,8 +138,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 }
 
 const ResetDialog = () => {
-
-  const {resetApp} = useAppStore()
+  const { resetApp } = useAppStore();
 
   return (
     <AlertDialogContent>
