@@ -20,16 +20,25 @@ export const useMonitor = () => {
     let statusUnlisten: UnlistenFn;
 
     const setupSubscriptions = async () => {
+
+      const checkRunning = await isMonitorRunning();
+      setIsRunning(checkRunning)
+
       clipboardUnlisten = await onTextUpdate((text) => {
         addItem({ content: text });
       });
 
-      console.log("Hello")
+     
       statusUnlisten = await listenToMonitorStatusUpdate((running) => {
         console.log({running})
         setIsRunning(running);
       });
     };
+
+    // const checkMonitorRunning = async () => {
+
+    // }
+
 
     setupSubscriptions();
 

@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { toast } from "sonner";
 import { getDB } from "@/lib/db";
 import { nanoid } from "nanoid";
+import { isLink } from "@/lib/utils";
 
 type ClipboardStore = {
   items: ClipboardItem[];
@@ -16,15 +17,24 @@ type ClipboardStore = {
   handleFilter: (type: string) => void;
   handleSearch: (query: string) => void;
   applyFilters: () => void;
+  findCountedItems: () => Promise<void>;
 };
 
 export const useClipboardStore = create<ClipboardStore>((set, get) => ({
   items: [],
   filterType: "all",
   searchQuery: "",
+  findCountedItems: async () => {
+    const db = await getDB();
+    const count = await db.select(`SELECT COUNT(*) FROM clipboards LIMIT 1`);
+
+    console.log({ count });
+  },
   fetchItems: async () => {
     const db = await getDB();
-    const rows = await db.select("SELECT * FROM clipboards");
+    const rows = await db.select(
+      "SELECT * FROM clipboards ORDER BY createdAt ASC"
+    );
 
     //  ORDER BY created DESC
 
@@ -50,7 +60,9 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       params.push(`%${searchQuery}%`);
     }
 
-    query += " ORDER BY created DESC";
+    query += " ORDER BY createdAt ASC";
+
+    console.log({ query, params });
 
     const rows = await db.select(query, params);
 
@@ -80,6 +92,11 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       const id = nanoid();
       const createdAt = Date.now();
       const isFavorite = data.isFavorite ? 1 : 0;
+
+      if (data.content && isLink(data.content)) {
+        data.type = "link";
+      }
+
       await db.execute(
         "INSERT INTO clipboards (id, content, type, isFavorite, createdAt) VALUES (?, ?, ?, ?, ?)",
         [id, data.content, data.type ?? "text", isFavorite, createdAt]

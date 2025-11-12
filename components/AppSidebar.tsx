@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, {useEffect} from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -40,7 +40,8 @@ const filters = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // const { clipboards, allClipboards, filterType, handleFilter } =
   //   useClipboardStore((state) => state);
-  const { filterType, handleFilter } = useClipboardStore();
+  const { filterType, handleFilter, findCountedItems } = useClipboardStore();
+
   const itemCounts = {
     // all: allClipboards.length,
     // text: allClipboards.filter((item) => item.type === "text").length,
@@ -48,6 +49,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     // link: allClipboards.filter((item) => item.type === "link").length,
     // favorite: allClipboards.filter((item) => item.isFavorite).length,
   };
+
+
+  useEffect(() => {
+    findCountedItems()
+  }, [])
+
+
+  
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

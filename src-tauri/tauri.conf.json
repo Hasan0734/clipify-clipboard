@@ -18,8 +18,8 @@
         "height": 800,
         "resizable": true,
         "fullscreen": false,
-        "titleBarStyle": "Transparent",
-        "backgroundColor": null
+        "titleBarStyle": "Transparent"
+        
       }
     ],
     

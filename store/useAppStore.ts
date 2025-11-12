@@ -16,6 +16,8 @@ type AppStore = {
   resetApp: () => Promise<void>;
   handleWindowFocus: () => void;
   handleWindowBlur: () => void;
+  activeCopiedText: string;
+  setActiveCopiedText: (text: string) => void;
 };
 
 let lockTimeout: NodeJS.Timeout | null = null;
@@ -26,6 +28,10 @@ export const useAppStore = create<AppStore>()(
       screen: "welcome",
       setScreen: (screen) => set({ screen }),
       initialized: false,
+
+      activeCopiedText: "",
+
+      setActiveCopiedText: (text: string) => set({ activeCopiedText: text }),
 
       initApp: async () => {
         try {
@@ -84,7 +90,7 @@ export const useAppStore = create<AppStore>()(
       handleWindowBlur: () => {
         if (lockTimeout) clearTimeout(lockTimeout);
         lockTimeout = setTimeout(() => {
-          const { screen,initialized, setScreen } = get();
+          const { screen, initialized, setScreen } = get();
           if (screen === "clipboard" && initialized) {
             setScreen("lock");
           }

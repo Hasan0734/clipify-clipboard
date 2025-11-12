@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -29,8 +29,17 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { writeText } from "tauri-plugin-clipboard-api";
+import {
+  listenToMonitorStatusUpdate,
+  onTextUpdate,
+  readText,
+  writeText,
+} from "tauri-plugin-clipboard-api";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { useClipboardStore } from "@/store/useClipboardStore";
+import { cn } from "@/lib/utils";
+import { UnlistenFn } from "@tauri-apps/api/event";
+import { useAppStore } from "@/store/useAppStore";
 
 const typeIcons = {
   text: FileText,
@@ -41,6 +50,7 @@ const typeIcons = {
 const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
   const toggleFavorite = useClipboardStore((state) => state.toggleFavorite);
   const deleteClipboard = useClipboardStore((state) => state.deleteItem);
+  const [activeCoppied, setActiveCoppied] = useState(false);
 
   const Icon = typeIcons[data.type];
 
@@ -60,8 +70,16 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
     deleteClipboard(data.id);
   };
 
+  const activeCopiedText = useAppStore((s) => s.activeCopiedText);
+  const isActive = activeCopiedText === data.content;
+
   return (
-    <Card className="@container/card rounded-xl shadow-xl hover:shadow-2xl p-3 gap-0 w-full ">
+    <Card
+      className={cn(
+        "@container/card rounded-xl shadow-xl hover:shadow-2xl p-3 gap-0 w-full ",
+        { "bg-primary/10": isActive }
+      )}
+    >
       <CardHeader className="p-0">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -109,13 +127,14 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
                       {data.content}
                     </p>
                   ) : data.type === "link" ? (
-                    <a
-                      href={data.content}
-                      className="text-blue-400 text-base hover:underline line-clamp-5 wrap-break-word"
-                      target="_blank"
+                    <p
+                      onClick={async () => {
+                        await openUrl(data.content);
+                      }}
+                      className="text-blue-400 text-base hover:underline line-clamp-5 break-all"
                     >
                       {data.content}
-                    </a>
+                    </p>
                   ) : (
                     <div
                       className="w-full h-28 overflow-hidden bg-gradient-to-br from-primary/5
@@ -183,13 +202,14 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
             {data.content}
           </p>
         ) : data.type === "link" ? (
-          <a
-            href={data.content}
+          <p
+            onClick={async () => {
+              await openUrl(data.content);
+            }}
             className="text-blue-400 text-base hover:underline line-clamp-5 wrap-break-word"
-            target="_blank"
           >
             {data.content}
-          </a>
+          </p>
         ) : (
           <div
             className="w-full h-28 overflow-hidden bg-gradient-to-br from-primary/5

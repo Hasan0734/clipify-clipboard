@@ -25,32 +25,38 @@ export default function LockScreen() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-       <div className="flex flex-col items-center space-y-4">
-          <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-            <Lock className="w-16 h-16 text-primary-foreground" />
-          </div>
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">Clipify System</h2>
-            <p className="text-muted-foreground mt-2">Enter password to unlock</p>
-          </div>
+      <div className="flex flex-col items-center space-y-4">
+        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+          <Lock className="w-16 h-16 text-primary-foreground" />
         </div>
-      <Input
-        type="password"
-        value={pin}
-        onChange={(e) => setPin(e.target.value)}
-        className="w-64 text-center"
-        placeholder="Enter your PIN"
-      />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      <Button onClick={handleUnlock} className="w-64">
-        Unlock
-      </Button>
-        <div className="text-center text-sm text-muted-foreground">
-          {new Date().toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-foreground">Clipify System</h2>
+          <p className="text-muted-foreground mt-2">Enter password to unlock</p>
         </div>
+      </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleUnlock();
+        }}
+        className="flex flex-col space-y-4"
+      >
+        <Input
+          type="password"
+          value={pin}
+          onChange={(e) => setPin(e.target.value)}
+          className="w-64 text-center"
+          placeholder="Enter your PIN"
+        />
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+        <Button className="w-64">Unlock</Button>
+      </form>
+      <div className="text-center text-sm text-muted-foreground">
+        {new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </div>
     </motion.div>
   );
 }
