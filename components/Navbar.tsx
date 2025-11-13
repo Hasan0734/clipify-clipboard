@@ -44,6 +44,7 @@ const Navbar = () => {
 
           <div className="ml-auto flex items-center gap-2">
             <Button
+            size={'sm'}
               onClick={() => {
                 isRunning ? handleStopListen() : handleStartListen();
               }}
@@ -58,11 +59,12 @@ const Navbar = () => {
               ) : (
                 <>
                   <PlayCircle className="w-4 h-4" />
-                  <span className="hidden sm:inline">Monitor Clipboard</span>
+                  <span className="hidden sm:inline">Monitor</span>
                 </>
               )}
             </Button>
             <Button
+            size={'sm'}
               onClick={() => setOpen(!open)}
               variant="default"
               className="gap-2"

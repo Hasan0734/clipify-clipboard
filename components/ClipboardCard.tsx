@@ -156,7 +156,7 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
                     })}
                   </p>
                   <Button
-                    size="sm"
+                    size="icon-sm"
                     variant="ghost"
                     onClick={handleCopy}
                     className="gap-2 hover:bg-primary/10"
@@ -164,12 +164,12 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
                     {copied ? (
                       <>
                         <Check className="w-3 h-3" />
-                        <span className="text-xs">Copied!</span>
+                        {/* <span className="text-xs">Copied!</span> */}
                       </>
                     ) : (
                       <>
                         <Copy className="w-3 h-3" />
-                        <span className="text-xs">Copy</span>
+                        {/* <span className="text-xs">Copy</span> */}
                       </>
                     )}
                   </Button>
@@ -225,7 +225,7 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
         )}
       </CardContent>
 
-      <CardFooter className=" mt-auto flex justify-between  w-full text-sm border-t pt-2!">
+      <CardFooter className=" mt-auto px-2 flex justify-between  w-full text-sm border-t pt-2!">
         <div className="flex items-center justify-between w-full text-sm">
           <p className="text-muted-foreground">
             {formatDistance(data.createdAt, new Date(), {
@@ -233,20 +233,20 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
             })}
           </p>
           <Button
-            size="sm"
+            size="icon-sm"
             variant="ghost"
             onClick={handleCopy}
             className="gap-2 hover:bg-primary/10"
           >
             {copied ? (
               <>
-                <Check className="w-3 h-3" />
-                <span className="text-xs">Copied!</span>
+                <Check  />
+                {/* <span className="text-xs">Copied!</span> */}
               </>
             ) : (
               <>
-                <Copy className="w-3 h-3" />
-                <span className="text-xs">Copy</span>
+                <Copy/>
+                {/* <span className="text-xs">Copy</span> */}
               </>
             )}
           </Button>

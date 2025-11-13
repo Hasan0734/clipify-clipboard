@@ -9,6 +9,7 @@ type ClipboardStore = {
   items: ClipboardItem[];
   filterType: string;
   searchQuery: string;
+  filterDate: Date | undefined;
   fetchItems: () => Promise<void>;
   addItem: (dat: Partial<ClipboardItem>) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
@@ -18,12 +19,15 @@ type ClipboardStore = {
   handleSearch: (query: string) => void;
   applyFilters: () => void;
   findCountedItems: () => Promise<void>;
+  handleSorting: (isDesc: boolean) => Promise<void>;
+  handleFilterByDate: (date: Date | undefined) => Promise<void>;
 };
 
 export const useClipboardStore = create<ClipboardStore>((set, get) => ({
   items: [],
   filterType: "all",
   searchQuery: "",
+  filterDate: undefined,
   findCountedItems: async () => {
     const db = await getDB();
     const count = await db.select(`SELECT COUNT(*) FROM clipboards LIMIT 1`);
@@ -33,7 +37,7 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
   fetchItems: async () => {
     const db = await getDB();
     const rows = await db.select(
-      "SELECT * FROM clipboards ORDER BY createdAt ASC"
+      "SELECT * FROM clipboards ORDER BY createdAt DESC"
     );
 
     //  ORDER BY created DESC
@@ -41,7 +45,7 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     set({ items: rows });
   },
   applyFilters: async () => {
-    const { items, filterType, searchQuery, fetchItems } = get();
+    const {  filterType, searchQuery, fetchItems, filterDate } = get();
     const db = await getDB();
 
     let query = "SELECT * FROM clipboards WHERE 1=1";
@@ -55,35 +59,23 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       query += " AND isFavorite = 1";
     }
 
+    if(filterDate) {
+      const timestamps = filterDate.getTime();
+
+      query += ` AND createdAt >= ${timestamps} AND createdAt < ${timestamps + 86400000}`
+
+    }
+
     if (searchQuery) {
       query += " AND content LIKE ?";
       params.push(`%${searchQuery}%`);
     }
 
-    query += " ORDER BY createdAt ASC";
-
-    console.log({ query, params });
+    query += " ORDER BY createdAt DESC";
 
     const rows = await db.select(query, params);
 
     set({ items: rows });
-
-    // const filtered = items.filter((item) => {
-    //   const matchesType =
-    //     filterType === "all"
-    //       ? true
-    //       : filterType === "favorite"
-    //       ? item.isFavorite
-    //       : item.type === filterType;
-
-    //   const matchesSearch = item.content
-    //     .toLowerCase()
-    //     .includes(searchQuery.toLowerCase());
-
-    //   return matchesType && matchesSearch;
-    // });
-
-    // set({ items: filtered });
   },
   addItem: async (data) => {
     try {
@@ -107,7 +99,7 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     } catch (error) {
       toast.error("Clipboard is accept duplicate text.");
     }
-    await get().fetchItems();
+    await get().applyFilters();
   },
   deleteItem: async (id) => {
     try {
@@ -142,6 +134,23 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
 
   handleSearch: (query) => {
     set({ searchQuery: query });
+    get().applyFilters();
+  },
+
+  handleSorting: async (isDesc) => {
+    const db = await getDB();
+    let query = "SELECT * FROM clipboards ORDER BY createdAt ";
+    if (isDesc) {
+      query += "DESC";
+    } else {
+      query += "ASC";
+    }
+    const rows = await db.select(query);
+
+    set({ items: rows });
+  },
+  handleFilterByDate: async (date) => {
+    set({ filterDate: date });
     get().applyFilters();
   },
 }));

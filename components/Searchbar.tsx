@@ -8,7 +8,7 @@ const SearchBar = () => {
 
   return (
     <div className="">
-      <InputGroup>
+      <InputGroup className="h-8">
         <InputGroupInput
           onChange={(e) => handleSearch(e.target.value)}
           placeholder="Search..."
