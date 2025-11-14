@@ -5,10 +5,18 @@ import { getDB } from "@/lib/db";
 import { nanoid } from "nanoid";
 import { isLink } from "@/lib/utils";
 
+type COUNT = {
+  total: number;
+  totalLink: number;
+  totalText: number;
+  totalFavorite: number;
+};
+
 type ClipboardStore = {
   items: ClipboardItem[];
   filterType: string;
   searchQuery: string;
+  sortByDesc: boolean;
   filterDate: Date | undefined;
   fetchItems: () => Promise<void>;
   addItem: (dat: Partial<ClipboardItem>) => Promise<void>;
@@ -19,33 +27,40 @@ type ClipboardStore = {
   handleSearch: (query: string) => void;
   applyFilters: () => void;
   findCountedItems: () => Promise<void>;
-  handleSorting: (isDesc: boolean) => Promise<void>;
+  handleSorting: () => Promise<void>;
   handleFilterByDate: (date: Date | undefined) => Promise<void>;
+  count: COUNT | undefined;
 };
 
 export const useClipboardStore = create<ClipboardStore>((set, get) => ({
   items: [],
   filterType: "all",
   searchQuery: "",
+  sortByDesc: true,
   filterDate: undefined,
+  count: { total: 0, totalLink: 0, totalText: 0, totalFavorite: 0 },
   findCountedItems: async () => {
     const db = await getDB();
-    const count = await db.select(`SELECT COUNT(*) FROM clipboards LIMIT 1`);
+    const count = await db.select(
+      `SELECT COUNT(*) as total, 
+      COUNT(CASE WHEN type = 'text' THEN 1 END) AS totalText,
+      COUNT(CASE WHEN type = 'link' THEN 1 END) AS totalLink,
+      COUNT(CASE WHEN isFavorite = 1 THEN 1 END) AS totalFavorite
+      FROM clipboards`
+    );
 
-    console.log({ count });
+    set({ count: count[0] });
   },
   fetchItems: async () => {
     const db = await getDB();
-    const rows = await db.select(
-      "SELECT * FROM clipboards ORDER BY createdAt DESC"
-    );
+    const rows = await db.select("SELECT * FROM clipboards");
 
     //  ORDER BY created DESC
 
     set({ items: rows });
   },
   applyFilters: async () => {
-    const {  filterType, searchQuery, fetchItems, filterDate } = get();
+    const { filterType, searchQuery, sortByDesc, filterDate } = get();
     const db = await getDB();
 
     let query = "SELECT * FROM clipboards WHERE 1=1";
@@ -59,11 +74,12 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       query += " AND isFavorite = 1";
     }
 
-    if(filterDate) {
+    if (filterDate) {
       const timestamps = filterDate.getTime();
 
-      query += ` AND createdAt >= ${timestamps} AND createdAt < ${timestamps + 86400000}`
-
+      query += ` AND createdAt >= ${timestamps} AND createdAt < ${
+        timestamps + 86400000
+      }`;
     }
 
     if (searchQuery) {
@@ -71,11 +87,16 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       params.push(`%${searchQuery}%`);
     }
 
-    query += " ORDER BY createdAt DESC";
+    if (sortByDesc) {
+      query += " ORDER BY createdAt DESC";
+    } else {
+      query += " ORDER BY createdAt ASC";
+    }
 
     const rows = await db.select(query, params);
 
     set({ items: rows });
+    await get().findCountedItems();
   },
   addItem: async (data) => {
     try {
@@ -100,13 +121,15 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       toast.error("Clipboard is accept duplicate text.");
     }
     await get().applyFilters();
+    await get().findCountedItems();
   },
   deleteItem: async (id) => {
     try {
       const db = await getDB();
-      const { fetchItems } = get();
+
       await db.execute("DELETE FROM clipboards WHERE id = ?", [id]);
-      await fetchItems();
+      await get().applyFilters();
+      await get().findCountedItems();
       toast.success("Successfully Deleted");
     } catch (error) {
       toast.error("Delete item not found.");
@@ -119,12 +142,14 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       [id]
     );
 
-    await get().fetchItems();
+    await get().applyFilters();
+    await get().findCountedItems();
   },
   clearAll: async () => {
     const db = await getDB();
     await db.execute("DELETE FROM clipboards");
     set(() => ({ items: [] }));
+    await get().findCountedItems();
     toast("Cleared all of clipboard data.");
   },
   handleFilter: (type) => {
@@ -137,21 +162,14 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     get().applyFilters();
   },
 
-  handleSorting: async (isDesc) => {
-    const db = await getDB();
-    let query = "SELECT * FROM clipboards ORDER BY createdAt ";
-    if (isDesc) {
-      query += "DESC";
-    } else {
-      query += "ASC";
-    }
-    const rows = await db.select(query);
-
-    set({ items: rows });
+  handleSorting: async () => {
+    set((state) => ({ sortByDesc: !state.sortByDesc }));
+    get().applyFilters();
   },
   handleFilterByDate: async (date) => {
     set({ filterDate: date });
     get().applyFilters();
+    await get().findCountedItems();
   },
 }));
 

@@ -43,6 +43,7 @@ export default function LockScreen() {
       >
         <Input
           type="password"
+          autoFocus
           value={pin}
           onChange={(e) => setPin(e.target.value)}
           className="w-64 text-center"

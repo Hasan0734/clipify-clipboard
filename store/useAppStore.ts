@@ -78,6 +78,7 @@ export const useAppStore = create<AppStore>()(
         await db.execute("DELETE FROM clipboards");
         await db.execute("DELETE FROM settings");
         set({ screen: "welcome", initialized: true });
+        
         if (lockTimeout) clearTimeout(lockTimeout);
       },
       handleWindowFocus: () => {

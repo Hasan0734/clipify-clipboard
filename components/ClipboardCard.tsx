@@ -10,7 +10,7 @@ import {
   FileText,
   Link2,
   Star,
-  Image as Imageicon,
+  Image as ImageIcon,
   Check,
   Copy,
   EllipsisVertical,
@@ -28,7 +28,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
 import {
   listenToMonitorStatusUpdate,
   onTextUpdate,
@@ -40,10 +39,11 @@ import { useClipboardStore } from "@/store/useClipboardStore";
 import { cn } from "@/lib/utils";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { useAppStore } from "@/store/useAppStore";
+import FullViewContent from "./FullViewContent";
 
 const typeIcons = {
   text: FileText,
-  image: Imageicon,
+  image: ImageIcon,
   link: Link2,
 } as const;
 
@@ -102,82 +102,13 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
                 }`}
               />
             </button>
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="p-1 rounded-lg hover:bg-accent/50 transition-colors">
-                  <Eye className={`w-5 h-5 transition-colors `} />
-                </button>
-              </DialogTrigger>
 
-              <DialogContent>
-                <DialogTitle>
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium capitalize">
-                      {data.type}
-                    </span>
-                  </div>
-                </DialogTitle>
+            <FullViewContent data={data} />
+            <Button variant={'outline'} size={'icon-sm'} onClick={handleDelete}>
+              <Trash2 />
+            </Button>
 
-                <div className="min-h-32">
-                  {data.type === "text" ? (
-                    <p className="dark:text-gray-400 text-base line-clamp-5 wrap-break-word">
-                      {data.content}
-                    </p>
-                  ) : data.type === "link" ? (
-                    <p
-                      onClick={async () => {
-                        await openUrl(data.content);
-                      }}
-                      className="text-blue-400 text-base hover:underline line-clamp-5 break-all"
-                    >
-                      {data.content}
-                    </p>
-                  ) : (
-                    <div
-                      className="w-full h-28 overflow-hidden bg-gradient-to-br from-primary/5
-           to-accent/5 rounded flex items-center justify-center"
-                    >
-                      <Image
-                        src={"/assets/sample-image.jpg"}
-                        alt=""
-                        width={300}
-                        height={120}
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center justify-between w-full text-sm border-t pt-3">
-                  <p className="text-muted-foreground">
-                    {formatDistance(data.createdAt, new Date(), {
-                      addSuffix: true,
-                    })}
-                  </p>
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={handleCopy}
-                    className="gap-2 hover:bg-primary/10"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-3 h-3" />
-                        {/* <span className="text-xs">Copied!</span> */}
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3 h-3" />
-                        {/* <span className="text-xs">Copy</span> */}
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="p-1 rounded-lg hover:bg-accent/50 transition-colors">
                   <EllipsisVertical className="size-5" />
@@ -191,7 +122,7 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
                   <Trash2 /> Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </div>
         </div>
       </CardHeader>
@@ -206,7 +137,7 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
             onClick={async () => {
               await openUrl(data.content);
             }}
-            className="text-blue-400 text-base hover:underline line-clamp-5 wrap-break-word"
+            className="text-blue-400 text-base hover:underline line-clamp-5 wrap-break-word cursor-pointer"
           >
             {data.content}
           </p>
@@ -240,12 +171,12 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
           >
             {copied ? (
               <>
-                <Check  />
+                <Check />
                 {/* <span className="text-xs">Copied!</span> */}
               </>
             ) : (
               <>
-                <Copy/>
+                <Copy />
                 {/* <span className="text-xs">Copy</span> */}
               </>
             )}

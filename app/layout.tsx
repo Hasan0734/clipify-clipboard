@@ -1,18 +1,12 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
+import AppContainer from "@/components/AppContainer";
 
 const inter = Inter({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
-
-export const metadata: Metadata = {
-  title: "Clipify - Smart clipboard manager",
-  description: "Smar colipboard manager only text",
-};
 
 export default function RootLayout({
   children,
@@ -29,8 +23,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-           <Toaster />
-          {children}
+          <AppContainer>{children}</AppContainer>
         </ThemeProvider>
       </body>
     </html>
