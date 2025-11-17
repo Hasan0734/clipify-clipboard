@@ -27,7 +27,7 @@ export default function LockScreen() {
     >
       <div className="flex flex-col items-center space-y-4">
         <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-          <Lock className="w-16 h-16 text-primary-foreground" />
+          <Lock className="w-16 h-16 text-primary-foreground dark:text-white" />
         </div>
         <div className="text-center">
           <h2 className="text-2xl font-bold text-foreground">Clipify System</h2>

@@ -52,38 +52,42 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     set({ count: count[0] });
   },
   fetchItems: async () => {
-    const db = await getDB();
-    const rows = await db.select("SELECT * FROM clipboards");
-
-    //  ORDER BY created DESC
-
-    set({ items: rows });
+    get().applyFilters();
   },
   applyFilters: async () => {
     const { filterType, searchQuery, sortByDesc, filterDate } = get();
     const db = await getDB();
 
-    let query = "SELECT * FROM clipboards WHERE 1=1";
+    let query = "SELECT * FROM clipboards";
     const params: any[] = [];
+    let whereAdded = false; // Flag to track if WHERE clause has been added
+
+    // Helper function to correctly add WHERE or AND
+    const addCondition = (condition: string) => {
+      if (!whereAdded) {
+        query += " WHERE";
+        whereAdded = true;
+      }
+      query += " " + condition;
+    };
 
     if (filterType && filterType !== "all" && filterType !== "favorite") {
-      query += " AND type = ?";
+      addCondition("type = ?");
       params.push(filterType);
     }
     if (filterType === "favorite") {
-      query += " AND isFavorite = 1";
+      addCondition("isFavorite = 1");
     }
 
     if (filterDate) {
       const timestamps = filterDate.getTime();
-
-      query += ` AND createdAt >= ${timestamps} AND createdAt < ${
-        timestamps + 86400000
-      }`;
+      addCondition(
+        `createdAt >= ${timestamps} AND createdAt < ${timestamps + 86400000}`
+      );
     }
 
     if (searchQuery) {
-      query += " AND content LIKE ?";
+      addCondition(` AND "content" LIKE ?`);
       params.push(`%${searchQuery}%`);
     }
 
@@ -163,6 +167,7 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
   },
 
   handleSorting: async () => {
+    console.log({ sort: get().sortByDesc });
     set((state) => ({ sortByDesc: !state.sortByDesc }));
     get().applyFilters();
   },

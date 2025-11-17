@@ -95,7 +95,7 @@ export const useAppStore = create<AppStore>()(
           if (screen === "clipboard" && initialized) {
             setScreen("lock");
           }
-        }, 1 * 60 * 1000); // 1 minutes
+        }, 1 * 60 * 5000); // 1 minutes
       },
     }),
     {
