@@ -15,6 +15,16 @@ type CotentType = {
   fill: string;
 };
 
+type WeeklyActivity = {
+  name: string;
+  total: number;
+};
+
+type CartData = {
+  date: string;
+  clip: number
+}
+
 type AnalyticsStore = {
   totalClips: number;
   today: GrowthType;
@@ -22,6 +32,8 @@ type AnalyticsStore = {
   week: GrowthType;
   month: GrowthType;
   contentTypes: CotentType[];
+  weeklyActivity: WeeklyActivity[];
+  clipChartData: CartData[];
 
   getAnalytics: () => Promise<void>;
 };
@@ -33,6 +45,8 @@ export const useAnalytics = create<AnalyticsStore>((set, get) => ({
   week: { total: 0, growth: 0, direction: "" },
   month: { total: 0, growth: 0, direction: "" },
   contentTypes: [],
+  weeklyActivity: [],
+  clipChartData: [],
 
   getAnalytics: async () => {
     const db = await getDB();
@@ -84,9 +98,38 @@ export const useAnalytics = create<AnalyticsStore>((set, get) => ({
         },
       ];
 
-      console.log(typeDistribution);
+      const lastClips = await db.select(`
+  SELECT 
+  DATE(createdAt / 1000, 'unixepoch') AS date,
+  COUNT(*) AS clips
+  FROM clipboards
+  WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-6 days')
+  GROUP BY DATE(createdAt / 1000, 'unixepoch')
+  ORDER BY DATE(createdAt / 1000, 'unixepoch')
+  `);
 
+      //     SELECT
+      //   strftime('%w', createdAt / 1000, 'unixepoch') AS date,
+      //   COUNT(*) AS clips
+      // FROM clipboards
+      // WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-6 days')
+      // GROUP BY DATE(createdAt / 1000, 'unixepoch')
+      // ORDER BY DATE(createdAt / 1000, 'unixepoch')
+
+   
+      // const weekData = {
+      //   Sun: 0,
+      //   Mon: 0,
+      //   Tue: 0,
+      //   Wed: 0,
+      //   Thu: 0,
+      //   Fri: 0,
+      //   Sat: 0,
+      // };
+
+        console.log(lastClips)
       set({
+        clipChartData: lastClips,
         totalClips: total,
         today: {
           total: todayCount,
