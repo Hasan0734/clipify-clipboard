@@ -1,19 +1,14 @@
 "use client";
 import React, { useEffect } from "react";
 import ClipboardCard from "./ClipboardCard";
-import { Button } from "./ui/button";
-import { Calendar, Clipboard, SortAsc } from "lucide-react";
-import SearchBar from "./SearchBar";
-import { isMonitorRunning } from "tauri-plugin-clipboard-api";
-
-
+import {  Clipboard } from "lucide-react";
 
 import { useClipboardStore } from "@/store/useClipboardStore";
-import { useFocusedPasteListener } from "@/hooks/useFocusedPasteListener";
+
 
 const Clipboards = () => {
   const { items, fetchItems } = useClipboardStore((st) => st);
-  useFocusedPasteListener();
+
 
 
   useEffect(() => {

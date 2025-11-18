@@ -65,10 +65,10 @@ const StaticsCard = ({
         <div className="line-clamp-1 flex gap-2 font-medium text-muted-foreground">
           {growth && direction && (
             <span>
-              <span className="capitalize">{direction}</span>{" "}
+              <span className="capitalize">{direction}</span>
               {growth?.toFixed()}% from 
             </span>
-          )}{" "}
+          )}
           {text}
         </div>
       </CardFooter>

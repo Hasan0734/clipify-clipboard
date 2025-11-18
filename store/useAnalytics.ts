@@ -1,5 +1,6 @@
 import { getDB } from "@/lib/db";
 import { calcGrowth, getGrowthStatus } from "@/lib/utils";
+import { link } from "fs";
 import { create } from "zustand";
 
 type GrowthType = {
@@ -67,12 +68,23 @@ export const useAnalytics = create<AnalyticsStore>((set, get) => ({
       const growthWeek = calcGrowth(thisWeekCount, lastWeekCount);
       const growthMonth = calcGrowth(thisMonthCount, lastMonthCount);
 
-      const pct = (count: number) => (total > 0 ? (count / total) * 100 : 0);
+      const pct = (count: number) =>
+        total > 0 ? Math.floor((count / total) * 100).toFixed(0) : 0;
 
       const typeDistribution = [
-        { name: "Text", value: pct(textCount), fill: "var(--color-text)" },
-        { name: "Links", value: pct(linkCount), fill: "var(--color-link)" },
+        {
+          name: "Text",
+          value: Number(pct(textCount)),
+          fill: "var(--color-text)",
+        },
+        {
+          name: "Links",
+          value: Number(pct(linkCount)),
+          fill: "var(--color-link)",
+        },
       ];
+
+      console.log(typeDistribution);
 
       set({
         totalClips: total,

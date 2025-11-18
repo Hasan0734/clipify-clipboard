@@ -38,6 +38,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { useClipboardStore } from "@/store/useClipboardStore";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useFocusedPasteListener } from "@/hooks/useFocusedPasteListener";
 
 const filters = [
   { id: "all", label: "All Clips", icon: Layers, count: 212 },
@@ -49,11 +50,9 @@ const filters = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  useFocusedPasteListener();
 
-  console.log(pathname);
 
-  // const { clipboards, allClipboards, filterType, handleFilter } =
-  //   useClipboardStore((state) => state);
   const { filterType, handleFilter, findCountedItems, count } =
     useClipboardStore();
 
@@ -89,7 +88,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Pages</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              
               <SidebarMenuItem>
                 <Link href={"/"} replace>
                   <SidebarMenuButton isActive={pathname === "/"}>

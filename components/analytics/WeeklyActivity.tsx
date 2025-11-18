@@ -39,9 +39,8 @@ const WeeklyActivity = () => {
         <CardTitle className="text-foreground">Weekly Activity</CardTitle>
       </CardHeader>
       <CardContent className="">
-        <ChartContainer config={chartConfig} className="max-h-[400px]">
+        <ChartContainer config={chartConfig}>
           <LineChart data={activityData} >
-            {/* <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" /> */}
 
             <CartesianGrid strokeDasharray="3 3"  />
 
