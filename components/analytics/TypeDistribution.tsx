@@ -6,12 +6,14 @@ import {
   CardContent,
   CardFooter,
 } from "../ui/card";
-import { PieChart, Pie } from "recharts";
+import { PieChart, Pie, LabelList } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from "../ui/chart";
 import { useAnalytics } from "@/store/useAnalytics";
 
@@ -22,20 +24,18 @@ import { useAnalytics } from "@/store/useAnalytics";
 const chartConfig = {
   text: {
     label: "Text",
-    color: "var(--chart-1)",
+    color: "var(--chart-3)",
   },
   link: {
     label: "Link",
-    color: "var(--chart-2)",
-  },
-  other: {
-    label: "Other",
-    color: "var(--chart-5)",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 
 const TypeDistribution = () => {
   const typeDistribution = useAnalytics((st) => st.contentTypes);
+
+  console.log(typeDistribution);
 
   return (
     <Card className="flex flex-col bg-card/80">
@@ -45,22 +45,46 @@ const TypeDistribution = () => {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[350px] pb-0"
+          className="mx-auto aspect-square max-h-[250px] pb-0"
         >
           <PieChart>
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={
+                <ChartTooltipContent
+                 indicator="dashed" 
+                 
+                  />
+              }
             />
             <Pie
               data={typeDistribution}
               dataKey="value"
+              // label={({ name, percent }: { name: string; percent: number }) =>
+              //   `${name} ${(percent * 100).toFixed(0)}%`
+              // }
+              // outerRadius={80}
+              // labelLine={false}
+            />
+            <LabelList
+              dataKey="name"
               nameKey="name"
-              label={({ name, percent }: { name: string; percent: number }) =>
-                `${name} ${(percent * 100).toFixed(0)}%`
+              className="fill-background"
+              stroke="none"
+              fontSize={12}
+              formatter={(value: keyof typeof chartConfig) =>
+                chartConfig[value]?.label
               }
-              outerRadius={100}
-              labelLine={false}
+            />
+            <ChartLegend
+              content={
+                <ChartLegendContent
+                  nameKey={"name"}
+                  payload={undefined}
+                  verticalAlign={undefined}
+                />
+              }
+              className="-translate-y-2 flex-wrap gap-2 *:basis-1/4 *:justify-center"
             />
           </PieChart>
         </ChartContainer>

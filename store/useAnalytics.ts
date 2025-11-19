@@ -22,8 +22,9 @@ type WeeklyActivity = {
 
 type CartData = {
   date: string;
-  clip: number
-}
+  text: number;
+  link: number;
+};
 
 type AnalyticsStore = {
   totalClips: number;
@@ -34,7 +35,7 @@ type AnalyticsStore = {
   contentTypes: CotentType[];
   weeklyActivity: WeeklyActivity[];
   clipChartData: CartData[];
-
+  getBarChartData: (range: string) => Promise<void>;
   getAnalytics: () => Promise<void>;
 };
 
@@ -64,8 +65,6 @@ export const useAnalytics = create<AnalyticsStore>((set, get) => ({
         COUNT(CASE WHEN type = 'link' THEN 1 END) AS linkCount 
         FROM clipboards`);
 
-      //   set({ totalClips: data[0].total, favorite: data[0].totalFavorite });
-
       const {
         total,
         todayCount,
@@ -83,53 +82,32 @@ export const useAnalytics = create<AnalyticsStore>((set, get) => ({
       const growthMonth = calcGrowth(thisMonthCount, lastMonthCount);
 
       const pct = (count: number) =>
-        total > 0 ? Math.floor((count / total) * 100).toFixed(0) : 0;
+        total > 0 ? Math.round((count / total) * 100).toFixed(0) : 0;
+
+      console.log((textCount/total) * 100, (linkCount/total) * 100)
 
       const typeDistribution = [
         {
-          name: "Text",
+          name: "text",
           value: Number(pct(textCount)),
           fill: "var(--color-text)",
         },
         {
-          name: "Links",
+          name: "link",
           value: Number(pct(linkCount)),
           fill: "var(--color-link)",
         },
       ];
 
-      const lastClips = await db.select(`
-  SELECT 
-  DATE(createdAt / 1000, 'unixepoch') AS date,
-  COUNT(*) AS clips
-  FROM clipboards
-  WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-6 days')
-  GROUP BY DATE(createdAt / 1000, 'unixepoch')
-  ORDER BY DATE(createdAt / 1000, 'unixepoch')
-  `);
+      const weekly = await db.select(`SELECT
+       strftime('%w', createdAt / 1000, 'unixepoch') AS date,
+       COUNT(*) AS clips
+       FROM clipboards
+       WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-6 days')
+       GROUP BY DATE(createdAt / 1000, 'unixepoch')
+       ORDER BY DATE(createdAt / 1000, 'unixepoch')`);
 
-      //     SELECT
-      //   strftime('%w', createdAt / 1000, 'unixepoch') AS date,
-      //   COUNT(*) AS clips
-      // FROM clipboards
-      // WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-6 days')
-      // GROUP BY DATE(createdAt / 1000, 'unixepoch')
-      // ORDER BY DATE(createdAt / 1000, 'unixepoch')
-
-   
-      // const weekData = {
-      //   Sun: 0,
-      //   Mon: 0,
-      //   Tue: 0,
-      //   Wed: 0,
-      //   Thu: 0,
-      //   Fri: 0,
-      //   Sat: 0,
-      // };
-
-        console.log(lastClips)
       set({
-        clipChartData: lastClips,
         totalClips: total,
         today: {
           total: todayCount,
@@ -154,5 +132,41 @@ export const useAnalytics = create<AnalyticsStore>((set, get) => ({
     }
 
     // const growth = ((thisWeek - lastWeek) / lastWeek) * 100;
+  },
+  getBarChartData: async (range) => {
+    try {
+      const db = await getDB();
+
+      const lastClips = await db.select(`
+  SELECT 
+  DATE(createdAt / 1000, 'unixepoch') AS date,
+  SUM(CASE WHEN type = 'text' THEN 1 ELSE 0 END) as text,
+  SUM(CASE WHEN type = 'link' THEN 1 ELSE 0 END) as link
+  FROM clipboards
+  WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '${range}')
+  GROUP BY DATE(createdAt / 1000, 'unixepoch')
+  ORDER BY DATE(createdAt / 1000, 'unixepoch')
+  `);
+      set({
+        clipChartData: lastClips,
+      });
+      // SELECT
+      // DATE(createdAt / 1000, 'unixepoch') AS date,
+      // COUNT(*) AS clips
+      // FROM clipboards
+      // WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-30 days')
+      // GROUP BY DATE(createdAt / 1000, 'unixepoch')
+      // ORDER BY DATE(createdAt / 1000, 'unixepoch')
+
+      //     SELECT
+      //   strftime('%w', createdAt / 1000, 'unixepoch') AS date,
+      //   COUNT(*) AS clips
+      // FROM clipboards
+      // WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-6 days')
+      // GROUP BY DATE(createdAt / 1000, 'unixepoch')
+      // ORDER BY DATE(createdAt / 1000, 'unixepoch')
+    } catch (error) {
+      console.log({ error });
+    }
   },
 }));
