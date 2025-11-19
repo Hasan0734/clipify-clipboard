@@ -1,37 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 Clifiy — Smart Clipboard Manager (Tauri + Next.js)
 
-## Getting Started
+Clifiy is a modern, lightweight, and privacy-focused clipboard manager built with **Tauri**, **Next.js**, and **SQLite**.  
+It quietly runs in the background, automatically capturing anything you copy — text or links — and stores it locally so you can reuse it anytime.
 
-First, run the development server:
+No cloud. No tracking. Everything stays on your computer.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🧠 Automatic Clipboard Monitoring
+Clifiy watches your clipboard in the background and instantly saves:
+- 📄 Text  
+- 🔗 Links
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+All clips are stored automatically — no need to manually save anything.
 
-## Learn More
+### 🗄️ Local SQLite Storage
+All data is stored securely in a **local SQLite database**.  
+Fast. Offline. Private.
 
-To learn more about Next.js, take a look at the following resources:
+### 💻 Desktop App (Tauri)
+- Lightweight (only a few MB)
+- Secure (Rust backend)
+- Runs natively on Windows, macOS, and Linux
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 🎨 Modern UI with ShadCN + Next.js
+- Beautiful, minimal interface
+- Dark & light themes
+- Smooth animations
+- Fully responsive layout
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 📊 Analytics & Insights
+Get detailed usage statistics:
+- Daily clips count  
+- Weekly growth  
+- Type distribution (text vs links)  
+- Activity timeline  
+- Favorites count  
 
-## Deploy on Vercel
+### ⭐ Favorite Clips
+Mark important clips as favorites and access them instantly.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# clipify
+## 🧩 Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Desktop Runtime | **Tauri** (Rust) |
+| Frontend | **Next.js**, **TypeScript**, **ShadCN UI** |
+| Backend | Tauri Commands (Rust) |
+| Database | **SQLite** |
+| Styling | Tailwind CSS |
+| Charts | Recharts |
+
+---
