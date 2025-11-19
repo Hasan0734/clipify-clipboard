@@ -6,7 +6,13 @@ import {
   CardContent,
   CardFooter,
 } from "../ui/card";
-import { PieChart, Pie, LabelList } from "recharts";
+import {
+  PieChart,
+  Pie,
+  LabelList,
+  PieLabelRenderProps,
+  TooltipContentProps,
+} from "recharts";
 import {
   ChartConfig,
   ChartContainer,
@@ -37,6 +43,47 @@ const TypeDistribution = () => {
 
   console.log(typeDistribution);
 
+  const RADIAN = Math.PI / 180;
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    name,
+    percent,
+  }: PieLabelRenderProps) => {
+    console.log(percent);
+
+    if (
+      cx == null ||
+      cy == null ||
+      innerRadius == null ||
+      outerRadius == null
+    ) {
+      return null;
+    }
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const ncx = Number(cx);
+    const x = ncx + radius * Math.cos(-(midAngle ?? 0) * RADIAN);
+    const ncy = Number(cy);
+    const y = ncy + radius * Math.sin(-(midAngle ?? 0) * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={x > ncx ? "start" : "end"}
+        dominantBaseline="central"
+      >
+        {`${name.charAt(0).toUpperCase() + name.slice(1)} ${(
+          (percent ?? 1) * 100
+        ).toFixed(0)}%`}
+      </text>
+    );
+  };
+
   return (
     <Card className="flex flex-col bg-card/80">
       <CardHeader className="items-center pb-0">
@@ -45,37 +92,24 @@ const TypeDistribution = () => {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px] pb-0"
+          className="mx-auto aspect-square max-h-[350px] pb-0"
         >
           <PieChart>
-            <ChartTooltip
+            {/* <ChartTooltip
               cursor={false}
               content={
                 <ChartTooltipContent
-                 indicator="dashed" 
-                 
-                  />
+                  indicator="dashed"
+                  payload={[]}
+                />
               }
-            />
+            /> */}
             <Pie
               data={typeDistribution}
-              dataKey="value"
-              // label={({ name, percent }: { name: string; percent: number }) =>
-              //   `${name} ${(percent * 100).toFixed(0)}%`
-              // }
-              // outerRadius={80}
-              // labelLine={false}
-            />
-            <LabelList
-              dataKey="name"
-              nameKey="name"
-              className="fill-background"
-              stroke="none"
-              fontSize={12}
-              formatter={(value: keyof typeof chartConfig) =>
-                chartConfig[value]?.label
-              }
-            />
+              label={renderCustomizedLabel}
+              labelLine={false}
+
+            ></Pie>
             <ChartLegend
               content={
                 <ChartLegendContent
