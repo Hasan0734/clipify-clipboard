@@ -1,6 +1,6 @@
 import { useAnalytics } from "@/store/useAnalytics";
 import StaticsCard from "./StaticsCard";
-import { Clipboard, Copy, Star } from "lucide-react";
+import {  Copy } from "lucide-react";
 
 const Statics = () => {
   const { totalClips, today, week, month } = useAnalytics();
@@ -9,7 +9,6 @@ const Statics = () => {
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       <StaticsCard text="All clipboards" title={"Total Clips"} total={totalClips} Icon={Copy} />
-      {/* <StaticsCard title={"Favorite"} total={favorite}  Icon={Star}/> */}
       <StaticsCard
         title={"Today Clip's"}
         total={today.total}

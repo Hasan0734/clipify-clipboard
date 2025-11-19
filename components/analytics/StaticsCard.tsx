@@ -1,10 +1,8 @@
-import React from "react";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 import { NumericFormat } from "react-number-format";
 import {
   Card,
   CardAction,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,

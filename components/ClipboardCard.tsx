@@ -23,21 +23,11 @@ import Image from "next/image";
 import { ClipboardItem } from "@/lib/types";
 import { formatDistance } from "date-fns";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import {
-  listenToMonitorStatusUpdate,
-  onTextUpdate,
-  readText,
   writeText,
 } from "tauri-plugin-clipboard-api";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useClipboardStore } from "@/store/useClipboardStore";
 import { cn } from "@/lib/utils";
-import { UnlistenFn } from "@tauri-apps/api/event";
 import { useAppStore } from "@/store/useAppStore";
 import FullViewContent from "./FullViewContent";
 
@@ -50,7 +40,6 @@ const typeIcons = {
 const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
   const toggleFavorite = useClipboardStore((state) => state.toggleFavorite);
   const deleteClipboard = useClipboardStore((state) => state.deleteItem);
-  const [activeCoppied, setActiveCoppied] = useState(false);
 
   const Icon = typeIcons[data.type];
 
@@ -70,14 +59,11 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
     deleteClipboard(data.id);
   };
 
-  const activeCopiedText = useAppStore((s) => s.activeCopiedText);
-  const isActive = activeCopiedText === data.content;
-
   return (
     <Card
       className={cn(
-        "@container/card rounded-xl shadow-xl hover:shadow-2xl p-3 gap-0 w-full ",
-        { "bg-primary/10": isActive }
+        "@container/card rounded-xl shadow-xl hover:shadow-2xl p-3 gap-0 w-full "
+     
       )}
     >
       <CardHeader className="p-0">

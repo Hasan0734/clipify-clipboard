@@ -1,5 +1,4 @@
-import { SidebarInset, SidebarProvider } from "../ui/sidebar";
-import { AppSidebar } from "../AppSidebar";
+
 import Clipboards from "../Clipboards";
 import CustomLayout from "../CustomLayout";
 import ClipboardHeader from "../ClipboardHeader";

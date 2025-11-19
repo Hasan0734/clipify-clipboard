@@ -6,7 +6,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { NewClipDialog } from "./NewClip";
-import { toast } from "sonner";
 import { useClipboardStore } from "@/store/useClipboardStore";
 import { useAppStore } from "@/store/useAppStore";
 import { useMonitor } from "@/hooks/use-monitor";
@@ -26,7 +25,6 @@ const Navbar = () => {
       type: data.type,
       isFavorite: data.isFavorite,
     };
-    // handleAddNew(newClip);
     addItem(newClip);
   
   };

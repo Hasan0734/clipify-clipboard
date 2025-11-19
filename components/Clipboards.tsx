@@ -2,14 +2,10 @@
 import React, { useEffect } from "react";
 import ClipboardCard from "./ClipboardCard";
 import {  Clipboard } from "lucide-react";
-
 import { useClipboardStore } from "@/store/useClipboardStore";
-
 
 const Clipboards = () => {
   const { items, fetchItems } = useClipboardStore((st) => st);
-
-
 
   useEffect(() => {
     fetchItems();

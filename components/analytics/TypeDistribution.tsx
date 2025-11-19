@@ -9,24 +9,17 @@ import {
 import {
   PieChart,
   Pie,
-  LabelList,
   PieLabelRenderProps,
-  TooltipContentProps,
 } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
 } from "../ui/chart";
 import { useAnalytics } from "@/store/useAnalytics";
 
-// const typeDistribution = [
-//   { name: "Text", value: 90, fill: "var(--color-text)" },
-//   { name: "Links", value: 10, fill: "var(--color-link)" },
-// ];
+
 const chartConfig = {
   text: {
     label: "Text",
