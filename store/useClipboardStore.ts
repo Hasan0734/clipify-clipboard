@@ -167,7 +167,6 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
   },
 
   handleSorting: async () => {
-    console.log({ sort: get().sortByDesc });
     set((state) => ({ sortByDesc: !state.sortByDesc }));
     get().applyFilters();
   },

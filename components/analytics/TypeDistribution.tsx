@@ -39,11 +39,11 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 const TypeDistribution = () => {
+
   const typeDistribution = useAnalytics((st) => st.contentTypes);
 
-  console.log(typeDistribution);
-
   const RADIAN = Math.PI / 180;
+  
   const renderCustomizedLabel = ({
     cx,
     cy,
@@ -53,7 +53,6 @@ const TypeDistribution = () => {
     name,
     percent,
   }: PieLabelRenderProps) => {
-    console.log(percent);
 
     if (
       cx == null ||
@@ -92,7 +91,7 @@ const TypeDistribution = () => {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[350px] pb-0"
+          className="mx-auto aspect-square max-h-[300px] 2xl:max-h-[350px] pb-0"
         >
           <PieChart>
             {/* <ChartTooltip

@@ -50,13 +50,13 @@ const chartConfig = {
 
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile();
-  const [timeRange, setTimeRange] = React.useState("-7 days");
+  const [timeRange, setTimeRange] = React.useState("-6 days");
   const {getBarChartData, clipChartData} = useAnalytics();
 
   React.useEffect(() => {
     if (isMobile) {
-      setTimeRange("-7 days");
-      getBarChartData('-7 days')
+      setTimeRange("-6 days");
+      getBarChartData('-6 days')
     }
   }, [isMobile]);
 
@@ -67,8 +67,6 @@ export function ChartAreaInteractive() {
 
   const handleOnChange = (range: string) => {
     setTimeRange(range);
-
-
 
   };
 
@@ -81,13 +79,13 @@ export function ChartAreaInteractive() {
             Total for the last{" "}
             {timeRange === "-7 days"
               ? "7 days"
-              : timeRange === "-30 days"
+              : timeRange === "-29 days"
               ? "30 days"
               : "3 months"}
           </span>
           <span className="@[540px]/card:hidden">Last {timeRange === "-7 days"
               ? "7 days"
-              : timeRange === "-30 days"
+              : timeRange === "-29 days"
               ? "30 days"
               : "3 months"}</span>
         </CardDescription>
@@ -99,9 +97,9 @@ export function ChartAreaInteractive() {
             variant="outline"
             className="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
           >
-            <ToggleGroupItem value="-90 days">Last 3 months</ToggleGroupItem>
-            <ToggleGroupItem value="-30 days">Last 30 days</ToggleGroupItem>
-            <ToggleGroupItem value="-7 days">Last 7 days</ToggleGroupItem>
+            <ToggleGroupItem value="-3 months">Last 3 months</ToggleGroupItem>
+            <ToggleGroupItem value="-29 days">Last 30 days</ToggleGroupItem>
+            <ToggleGroupItem value="-6 days">Last 7 days</ToggleGroupItem>
           </ToggleGroup>
           <Select value={timeRange} onValueChange={handleOnChange}>
             <SelectTrigger
@@ -112,13 +110,13 @@ export function ChartAreaInteractive() {
               <SelectValue placeholder="Last 3 months" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
-              <SelectItem value="-90 days" className="rounded-lg">
+              <SelectItem value="-3 months" className="rounded-lg">
                 Last 3 months
               </SelectItem>
-              <SelectItem value="-30 days" className="rounded-lg">
+              <SelectItem value="-29 days" className="rounded-lg">
                 Last 30 days
               </SelectItem>
-              <SelectItem value="-7 days" className="rounded-lg">
+              <SelectItem value="-6 days" className="rounded-lg">
                 Last 7 days
               </SelectItem>
             </SelectContent>
@@ -131,60 +129,7 @@ export function ChartAreaInteractive() {
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
         >
-          {/* <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-clips)"
-                  stopOpacity={1.0}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-date)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-             
-            </defs>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value:string) => {
-                const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })
-              }}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value:string) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })
-                  }}
-                  indicator="dot"
-                />
-              }
-            />
- 
-            <Area
-              dataKey="clips"
-              type="natural"
-              fill="url(#fillDesktop)"
-              stroke="var(--color-date)"
-              stackId="a"
-            />
-          </AreaChart> */}
+
 
           <BarChart
             accessibilityLayer

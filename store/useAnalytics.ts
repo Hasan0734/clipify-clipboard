@@ -84,7 +84,6 @@ export const useAnalytics = create<AnalyticsStore>((set, get) => ({
       const pct = (count: number) =>
         total > 0 ? Math.round((count / total) * 100).toFixed(0) : 0;
 
-      console.log((textCount/total) * 100, (linkCount/total) * 100)
 
       const typeDistribution = [
         {
@@ -100,15 +99,26 @@ export const useAnalytics = create<AnalyticsStore>((set, get) => ({
       ];
 
       const weekly = await db.select(`SELECT
-       strftime('%w', createdAt / 1000, 'unixepoch') AS date,
-       COUNT(*) AS clips
+      
+        case cast (strftime('%w', createdAt / 1000, 'unixepoch') as integer)
+        when 0 then 'Sun'
+        when 1 then 'Mon'
+        when 2 then 'Tue'
+        when 3 then 'Wed'
+        when 4 then 'Thu'
+        when 5 then 'Fri'
+        else 'Sat' end as weekday, 
+        SUM(CASE WHEN type = 'text' THEN 1 ELSE 0 END) as text,
+        SUM(CASE WHEN type = 'link' THEN 1 ELSE 0 END) as link
        FROM clipboards
-       WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-6 days')
+       WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now')
        GROUP BY DATE(createdAt / 1000, 'unixepoch')
        ORDER BY DATE(createdAt / 1000, 'unixepoch')`);
-
-      set({
+      
+      
+       set({
         totalClips: total,
+        weeklyActivity:weekly,
         today: {
           total: todayCount,
           growth: growthToday,
@@ -126,50 +136,31 @@ export const useAnalytics = create<AnalyticsStore>((set, get) => ({
         },
         contentTypes: typeDistribution,
       });
-      console.log({ growthToday, growthWeek, growthMonth });
     } catch (error) {
       console.log({ error });
     }
 
-    // const growth = ((thisWeek - lastWeek) / lastWeek) * 100;
   },
   getBarChartData: async (range) => {
     try {
       const db = await getDB();
 
       const lastClips = await db.select(`
-  SELECT 
-  DATE(createdAt / 1000, 'unixepoch') AS date,
-  SUM(CASE WHEN type = 'text' THEN 1 ELSE 0 END) as text,
-  SUM(CASE WHEN type = 'link' THEN 1 ELSE 0 END) as link
-  FROM clipboards
-  WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '${range}')
-  GROUP BY DATE(createdAt / 1000, 'unixepoch')
-  ORDER BY DATE(createdAt / 1000, 'unixepoch')
+      SELECT 
+      DATE(createdAt / 1000, 'unixepoch') AS date,
+      SUM(CASE WHEN type = 'text' THEN 1 ELSE 0 END) as text,
+      SUM(CASE WHEN type = 'link' THEN 1 ELSE 0 END) as link
+      FROM clipboards
+      WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '${range}')
+      GROUP BY DATE(createdAt / 1000, 'unixepoch')
+      ORDER BY DATE(createdAt / 1000, 'unixepoch')
   `);
       set({
         clipChartData: lastClips,
       });
-      // SELECT
-      // DATE(createdAt / 1000, 'unixepoch') AS date,
-      // COUNT(*) AS clips
-      // FROM clipboards
-      // WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-30 days')
-      // GROUP BY DATE(createdAt / 1000, 'unixepoch')
-      // ORDER BY DATE(createdAt / 1000, 'unixepoch')
-
-      //     SELECT
-      //   strftime('%w', createdAt / 1000, 'unixepoch') AS date,
-      //   COUNT(*) AS clips
-      // FROM clipboards
-      // WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-6 days')
-      // GROUP BY DATE(createdAt / 1000, 'unixepoch')
-      // ORDER BY DATE(createdAt / 1000, 'unixepoch')
+     
     } catch (error) {
       console.log({ error });
     }
   },
 }));
-
-
-

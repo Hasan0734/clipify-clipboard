@@ -30,7 +30,6 @@ export const useMonitor = () => {
 
      
       statusUnlisten = await listenToMonitorStatusUpdate((running) => {
-        console.log({running})
         setIsRunning(running);
       });
     };

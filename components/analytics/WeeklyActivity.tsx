@@ -1,4 +1,10 @@
-import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "../ui/card";
 import {
   LineChart,
   Line,
@@ -7,7 +13,16 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { ChartConfig, ChartContainer } from "../ui/chart";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "../ui/chart";
+import { useAnalytics } from "@/store/useAnalytics";
+import { link } from "fs";
+import { TrendingUp } from "lucide-react";
+import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 
 // Mock data for analytics
 const activityData = [
@@ -21,18 +36,20 @@ const activityData = [
 ];
 
 const chartConfig = {
-  clips: {
-    label: "Clips",
+  text: {
+    label: "Text",
     color: "var(--chart-1)",
   },
-  others: {
-    label: "Others",
+  link: {
+    label: "Link",
     color: "var(--chart-2)",
   },
-
 } satisfies ChartConfig;
 
 const WeeklyActivity = () => {
+  const activityData = useAnalytics((st) => st.weeklyActivity);
+  const { week } = useAnalytics();
+
   return (
     <Card className="bg-card/80 backdrop-blur-sm border-border/50 ">
       <CardHeader>
@@ -40,35 +57,44 @@ const WeeklyActivity = () => {
       </CardHeader>
       <CardContent className="">
         <ChartContainer config={chartConfig}>
-          <LineChart data={activityData} >
-
-            <CartesianGrid strokeDasharray="3 3"  />
+          <LineChart data={activityData}>
+            <CartesianGrid strokeDasharray="3 3" />
 
             <XAxis
-              dataKey="name"
+              dataKey="weekday"
               fontSize={12}
               stroke="var(--muted-foreground)"
-              
             />
             <YAxis fontSize={12} stroke="var(--muted-foreground)" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "var(--card)",
-                border: "1px solid var(--border)",
-                borderRadius: "8px",
-              }}
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Line
+              type="monotone"
+              dataKey="text"
+              strokeWidth={2}
+              stroke="var(--color-text)"
+              dot={false}
             />
             <Line
-        
               type="monotone"
-              dataKey="clips"
+              dataKey="link"
               strokeWidth={2}
-              stroke="var(--color-clips)"
+              stroke="var(--color-link)"
               dot={false}
             />
           </LineChart>
         </ChartContainer>
       </CardContent>
+      <CardFooter className="flex-col items-start gap-2 text-sm">
+        <div className="flex gap-2 leading-none font-medium">
+          Trending {week.direction} by {week.growth.toFixed()}% this week{" "}
+          {week.direction === "up" && (
+            <IconTrendingUp className="size-4 text-primary" />
+          )}
+          {week.direction === "down" && (
+            <IconTrendingDown className="size-4 text-primary" />
+          )}
+        </div>ƒ
+      </CardFooter>
     </Card>
   );
 };

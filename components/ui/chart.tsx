@@ -128,7 +128,6 @@ function ChartTooltipContent({
   }) {
   const { config } = useChart();
 
-  console.log({ payload });
 
   const tooltipLabel = React.useMemo(() => {
     if (hideLabel || !payload?.length) {
@@ -238,7 +237,7 @@ function ChartTooltipContent({
                       </div>
                       {item.value && (
                         <span className="text-foreground font-mono font-medium tabular-nums">
-                          {item.value.toLocaleString()}%
+                          {item.value.toLocaleString()}
                         </span>
                       )}
                     </div>
@@ -267,7 +266,6 @@ function ChartLegendContent({
   }) {
   const { config } = useChart();
 
-  console.log(payload);
 
   if (!payload?.length) {
     return null;

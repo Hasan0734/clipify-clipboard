@@ -16,7 +16,6 @@ export function useFocusedPasteListener() {
         const content = await readText();
         if (content && content.trim().length > 0) {
           addItem({ content });
-          console.log("is saved");
         }
       } catch (error) {
         console.error("past error: ", error);

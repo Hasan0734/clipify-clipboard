@@ -56,7 +56,7 @@ const StaticsCard = ({
           {direction === "up" && (
             <IconTrendingUp className="size-16 text-primary" />
           )}
-              {direction === "down" && (
+          {direction === "down" && (
             <IconTrendingDown className="size-16 text-primary" />
           )}
         </div>
@@ -65,8 +65,8 @@ const StaticsCard = ({
         <div className="line-clamp-1 flex gap-2 font-medium text-muted-foreground">
           {growth && direction && (
             <span>
-              <span className="capitalize">{direction}</span>
-              {growth?.toFixed()}% from 
+              <span className="capitalize">{direction}</span>{" "}
+              {growth?.toFixed()}% from
             </span>
           )}
           {text}
