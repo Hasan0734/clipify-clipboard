@@ -303,7 +303,7 @@ function ChartLegendContent({
                 />
               )}
               {itemConfig?.label}{" "}
-              {item.payload.percent && `${item.payload.value}%`}
+             {item && (item.payload as any)?.percent && `${(item.payload as any)?.value}%`}
             </div>
           );
         })}

@@ -11,7 +11,6 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
 } from "recharts";
 import {
   ChartConfig,
@@ -20,8 +19,6 @@ import {
   ChartTooltipContent,
 } from "../ui/chart";
 import { useAnalytics } from "@/store/useAnalytics";
-import { link } from "fs";
-import { TrendingUp } from "lucide-react";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 
 // Mock data for analytics
@@ -93,7 +90,7 @@ const WeeklyActivity = () => {
           {week.direction === "down" && (
             <IconTrendingDown className="size-4 text-primary" />
           )}
-        </div>ƒ
+        </div>
       </CardFooter>
     </Card>
   );

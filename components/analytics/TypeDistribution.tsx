@@ -6,11 +6,7 @@ import {
   CardContent,
   CardFooter,
 } from "../ui/card";
-import {
-  PieChart,
-  Pie,
-  PieLabelRenderProps,
-} from "recharts";
+import { PieChart, Pie, PieLabelRenderProps } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
@@ -18,7 +14,6 @@ import {
   ChartLegendContent,
 } from "../ui/chart";
 import { useAnalytics } from "@/store/useAnalytics";
-
 
 const chartConfig = {
   text: {
@@ -32,11 +27,10 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 const TypeDistribution = () => {
-
   const typeDistribution = useAnalytics((st) => st.contentTypes);
 
   const RADIAN = Math.PI / 180;
-  
+
   const renderCustomizedLabel = ({
     cx,
     cy,
@@ -46,7 +40,6 @@ const TypeDistribution = () => {
     name,
     percent,
   }: PieLabelRenderProps) => {
-
     if (
       cx == null ||
       cy == null ||
@@ -55,7 +48,8 @@ const TypeDistribution = () => {
     ) {
       return null;
     }
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const radius =
+      Number(innerRadius) + (Number(outerRadius) - Number(innerRadius)) * 0.5;
     const ncx = Number(cx);
     const x = ncx + radius * Math.cos(-(midAngle ?? 0) * RADIAN);
     const ncy = Number(cy);
@@ -97,11 +91,11 @@ const TypeDistribution = () => {
               }
             /> */}
             <Pie
+              dataKey="value"
               data={typeDistribution}
               label={renderCustomizedLabel}
               labelLine={false}
-
-            ></Pie>
+            />
             <ChartLegend
               content={
                 <ChartLegendContent

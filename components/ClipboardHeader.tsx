@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import Navbar from "./Navbar";
 import { ChevronDownIcon, SortAsc, SortDesc, Trash, X } from "lucide-react";
