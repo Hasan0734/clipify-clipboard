@@ -29,6 +29,8 @@ type ClipboardStore = {
   findCountedItems: () => Promise<void>;
   handleSorting: () => Promise<void>;
   handleFilterByDate: (date: Date | undefined) => Promise<void>;
+  getMostRecentItems: () => Promise<void>;
+  mostRecentItems: ClipboardItem[];
   count: COUNT | undefined;
 };
 
@@ -38,6 +40,7 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
   searchQuery: "",
   sortByDesc: true,
   filterDate: undefined,
+  mostRecentItems: [],
   count: { total: 0, totalLink: 0, totalText: 0, totalFavorite: 0 },
   findCountedItems: async () => {
     const db = await getDB();
@@ -52,7 +55,8 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     set({ count: count[0] });
   },
   fetchItems: async () => {
-    get().applyFilters();
+    await get().applyFilters();
+    await get().getMostRecentItems();
   },
   applyFilters: async () => {
     const { filterType, searchQuery, sortByDesc, filterDate } = get();
@@ -126,6 +130,7 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       toast.error("Clipboard is accept duplicate text.");
     }
     await get().applyFilters();
+    await get().getMostRecentItems();
     await get().findCountedItems();
   },
   deleteItem: async (id) => {
@@ -161,7 +166,6 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     set({ filterType: type });
     get().applyFilters();
   },
-
   handleSearch: (query) => {
     set({ searchQuery: query });
     get().applyFilters();
@@ -176,6 +180,16 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     get().applyFilters();
     await get().findCountedItems();
   },
+
+  getMostRecentItems: async () => {
+    const db = await getDB();
+
+    const items = await db.select(
+      "SELECT * FROM clipboards  ORDER BY createdAt DESC LIMIT 4"
+    );
+
+    set({ mostRecentItems: items });
+  },  
 }));
 
 // {

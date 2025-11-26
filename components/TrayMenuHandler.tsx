@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { TrayIcon } from "@tauri-apps/api/tray";
-import { Menu, MenuItem } from "@tauri-apps/api/menu";
+import { Menu, MenuItem, PredefinedMenuItem } from "@tauri-apps/api/menu";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { defaultWindowIcon } from "@tauri-apps/api/app";
 import {
@@ -10,13 +10,17 @@ import {
   listenToMonitorStatusUpdate,
   startListening,
   stopMonitor,
+  writeText,
 } from "tauri-plugin-clipboard-api";
 
 import { UnlistenFn } from "@tauri-apps/api/event";
+import { useClipboardStore } from "@/store/useClipboardStore";
 
 const TrayMenuHandler = () => {
-  // const { isRunning, handleStartListen, handleStopListen } = useMonitor();
-  // Use useRef to persist the tray instance across renders
+  const { mostRecentItems } = useClipboardStore((st) => st);
+
+  console.log(mostRecentItems);
+
   const trayRef = useRef<TrayIcon | undefined>(undefined);
 
   useEffect(() => {
@@ -37,17 +41,44 @@ const TrayMenuHandler = () => {
         trayRef.current = newTray; // Store the new tray instance in the ref
         await newTray.setIcon(await defaultWindowIcon());
 
-        // Create the menu items
+        const seperate = await PredefinedMenuItem.new({ item: "Separator" });
+        // Create the menu recent copied
+
+        const recentItem = await MenuItem.new({
+          id: "recent_clip",
+          text: "Recent Clip",
+          action: async () => {
+            await writeText(mostRecentItems[0].content);
+          },
+        });
+
+        const previousOne = await MenuItem.new({
+          id: "previous",
+          text: "Previous Clip",
+          action: async () => {
+            await writeText(mostRecentItems[1].content);
+          },
+        });
+
+        // const copiedItemPromises = mostRecentItems.map(async (clip) => {
+        //   const item = await MenuItem.new({
+        //     id: clip.id,
+        //     text: clip.content.slice(0, 20),
+        //     action: async () => {
+        //       await writeText(clip.content);
+        //     },
+        //   });
+
+        //   return item;
+        // });
+
+        // const copiedItems = await Promise.all(copiedItemPromises);
+        // Create the menu action items
         const monitorMenuItem = await MenuItem.new({
           id: "toggle_monitor",
-          // Initial text might be stale here if state updates before first render,
-          // but the listener below fixes it quickly.
           text: "Start Monitor",
           action: async () => {
             const checkRunning = await isMonitorRunning();
-            console.log({ checkRunning });
-            // These handlers come from the initial component mount closure, so use the listener update
-            // for the actual UI state synchronization.
             if (checkRunning) {
               await stopMonitor();
             } else {
@@ -55,19 +86,19 @@ const TrayMenuHandler = () => {
             }
           },
         });
-
         const quitMenuItem = await MenuItem.new({
           id: "quit",
           text: "Quit",
           action: async () => {
             const window = await getCurrentWindow();
             if (trayRef.current) {
-              await trayRef.current.close(); // Close the tray explicitly
+              await trayRef.current.close();
               trayRef.current = undefined;
             }
             window.destroy();
           },
         });
+
         const reOpenItem = await MenuItem.new({
           id: "reopen",
           text: "Open",
@@ -83,7 +114,14 @@ const TrayMenuHandler = () => {
         });
 
         const menu = await Menu.new({
-          items: [monitorMenuItem, reOpenItem, quitMenuItem],
+          items: [
+            recentItem,
+            previousOne,
+            seperate,
+            monitorMenuItem,
+            reOpenItem,
+            quitMenuItem,
+          ],
         });
 
         await newTray.setMenu(menu);
@@ -91,6 +129,9 @@ const TrayMenuHandler = () => {
         // Listen to monitor status updates and update the menu item text in real time
         statusUnlisten = await listenToMonitorStatusUpdate((running) => {
           monitorMenuItem.setText(running ? "Stop Monitor" : "Start Monitor");
+          newTray.setTooltip(
+            running ? "Monitoring is on" : "Monitoring is off"
+          );
         });
       } catch (e) {
         console.error("Could not set up tray menu handlers", e);
