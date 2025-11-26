@@ -1,7 +1,7 @@
 import React from "react";
 import { SidebarInset, SidebarProvider } from "./ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import TrayMenuHandler from "./TrayMenuHandler";
+
 
 const CustomLayout = ({ children }: { children: React.ReactNode }) => {
 
@@ -10,7 +10,6 @@ const CustomLayout = ({ children }: { children: React.ReactNode }) => {
     <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <TrayMenuHandler/>
         {children}</SidebarInset>
     </SidebarProvider>
   );
