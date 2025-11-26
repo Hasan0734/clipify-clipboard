@@ -16,6 +16,7 @@ export function useFocusedPasteListener() {
         const content = await readText();
         if (content && content.trim().length > 0) {
           addItem({ content });
+          console.log("it's from keyboard")
         }
       } catch (error) {
         console.error("past error: ", error);

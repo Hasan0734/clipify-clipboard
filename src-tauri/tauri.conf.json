@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "clipify",
+  "productName": "Clipify",
   "version": "0.1.0",
   "identifier": "com.clipify-final.dev",
   "build": {
@@ -10,20 +10,26 @@
     "beforeBuildCommand": "npm run build"
   },
   "app": {
-
+    "macOSPrivateApi": true,
     "windows": [
       {
         "title": "Clipboard Manager",
         "width": 1200,
         "height": 800,
+        "minHeight": 800,
+        "minWidth": 1200,
         "resizable": true,
         "fullscreen": false,
         "titleBarStyle": "Transparent",
-        "devtools":true
-        
+        "devtools": true,
+        "alwaysOnTop": false,
+        "decorations": true,
+        "minimizable": true,
+        "maximizable": true,
+        "closable": true
       }
     ],
-    
+
     "security": {
       "csp": null
     }
@@ -31,9 +37,6 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": [
-      "icons/my-icon.png"
-
-    ]
+    "icon": ["icons/my-icon.png"]
   }
 }

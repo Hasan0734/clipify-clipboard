@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/sonner";
 import WelcomeScreen from "@/components/screens/WelcomeScreen";
 import SetupScreen from "@/components/screens/SetupScreen";
 import LockScreen from "@/components/screens/LockScreen";
-
 export default function AppContainer({
   children,
 }: {

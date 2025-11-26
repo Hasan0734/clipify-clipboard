@@ -8,6 +8,7 @@ import {
   onTextUpdate,
   startListening,
   stopMonitor,
+
 } from "tauri-plugin-clipboard-api";
 import { useClipboardStore } from "@/store/useClipboardStore";
 
@@ -26,6 +27,8 @@ export const useMonitor = () => {
 
       clipboardUnlisten = await onTextUpdate((text) => {
         addItem({ content: text });
+          console.log("it's from monitoring")
+
       });
 
      

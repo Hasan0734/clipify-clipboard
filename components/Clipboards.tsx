@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import  { useEffect } from "react";
 import ClipboardCard from "./ClipboardCard";
 import {  Clipboard } from "lucide-react";
 import { useClipboardStore } from "@/store/useClipboardStore";

@@ -15,6 +15,8 @@ const Navbar = () => {
   const addItem = useClipboardStore((st) => st.addItem);
   const { isRunning, handleStartListen, handleStopListen } = useMonitor();
   const { setScreen } = useAppStore();
+
+  
   const handleCreateClip = (data: {
     content: string;
     type: "text" | "image" | "link";
@@ -71,7 +73,7 @@ const Navbar = () => {
               <span className="hidden sm:inline">New Clip</span>
             </Button>
             <ThemeToggle />
-            <Button variant={"ghost"} onClick={() => setScreen("lock")} size={"icon-sm"}>
+            <Button variant={"outline"} onClick={() => setScreen("lock")} size={"icon-sm"}>
               <Lock />
             </Button>
           </div>

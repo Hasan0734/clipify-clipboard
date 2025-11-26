@@ -121,6 +121,7 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       toast("Clip created!", {
         description: "Your new clip has been added successfully.",
       });
+      return;
     } catch (error) {
       toast.error("Clipboard is accept duplicate text.");
     }

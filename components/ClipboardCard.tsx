@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -13,10 +13,7 @@ import {
   Image as ImageIcon,
   Check,
   Copy,
-  EllipsisVertical,
-  SquarePen,
   Trash2,
-  Eye,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import Image from "next/image";
@@ -28,7 +25,6 @@ import {
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useClipboardStore } from "@/store/useClipboardStore";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/store/useAppStore";
 import FullViewContent from "./FullViewContent";
 
 const typeIcons = {
