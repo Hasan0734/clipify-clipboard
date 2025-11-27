@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { TrayIcon } from "@tauri-apps/api/tray";
 import { Menu, MenuItem, PredefinedMenuItem } from "@tauri-apps/api/menu";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { defaultWindowIcon } from "@tauri-apps/api/app";
+
 import {
   isMonitorRunning,
   listenToMonitorStatusUpdate,
@@ -13,146 +14,142 @@ import {
   writeText,
 } from "tauri-plugin-clipboard-api";
 
-import { UnlistenFn } from "@tauri-apps/api/event";
 import { useClipboardStore } from "@/store/useClipboardStore";
 
+// -----------------------------------------------------
+// 🔥 GLOBAL SINGLETON STATE — persists across reloads
+// -----------------------------------------------------
+let trayCreated = false;
+let tray: TrayIcon | null = null;
+
+// Store menu references so we can modify text later
+let recentItem: MenuItem | null = null;
+let previousItem: MenuItem | null = null;
+let monitorItem: MenuItem | null = null;
+
+// Global clipboard cache (React state won't work in tray actions)
+let GLOBAL_CLIPS: any[] = [];
+
 const TrayMenuHandler = () => {
-  const { mostRecentItems } = useClipboardStore((st) => st);
+  const { mostRecentItems } = useClipboardStore();
 
-  console.log(mostRecentItems);
-
-  const trayRef = useRef<TrayIcon | undefined>(undefined);
-
+  // -----------------------------------------------------
+  // 🔥 Keep global clip list always updated
+  // -----------------------------------------------------
   useEffect(() => {
-    let statusUnlisten: UnlistenFn | undefined;
+    GLOBAL_CLIPS = mostRecentItems;
+  }, [mostRecentItems]);
+
+  // -----------------------------------------------------
+  // 🔥 Create tray once (survives HMR + reload)
+  // -----------------------------------------------------
+  useEffect(() => {
+    if (trayCreated) return; // Prevent duplicate tray icons
+    trayCreated = true;
 
     const setupTray = async () => {
-      // Check if a tray already exists in the ref
-      if (trayRef.current) return;
-
       try {
-        const options = {
-          id: "main-tray", // Consistent ID ensures OS handles single instance
+        tray = await TrayIcon.new({
+          id: "main-tray",
           tooltip: "Smart Clipboard Manager",
           menuOnLeftClick: true,
-        };
+        });
 
-        const newTray = await TrayIcon.new(options);
-        trayRef.current = newTray; // Store the new tray instance in the ref
-        await newTray.setIcon(await defaultWindowIcon());
+        await tray.setIcon(await defaultWindowIcon());
 
-        const seperate = await PredefinedMenuItem.new({ item: "Separator" });
-        // Create the menu recent copied
-
-        const recentItem = await MenuItem.new({
-          id: "recent_clip",
-          text: "Recent Clip",
+        // -----------------------------
+        // Create menu items
+        // -----------------------------
+        recentItem = await MenuItem.new({
+          id: "current",
+          text: "Current Clip",
           action: async () => {
-            await writeText(mostRecentItems[0].content);
+            if (GLOBAL_CLIPS[0]) {
+              await writeText(GLOBAL_CLIPS[0].content);
+            }
           },
         });
 
-        const previousOne = await MenuItem.new({
+        previousItem = await MenuItem.new({
           id: "previous",
           text: "Previous Clip",
           action: async () => {
-            await writeText(mostRecentItems[1].content);
+            if (GLOBAL_CLIPS[1]) {
+              await writeText(GLOBAL_CLIPS[1].content);
+            }
           },
         });
 
-        // const copiedItemPromises = mostRecentItems.map(async (clip) => {
-        //   const item = await MenuItem.new({
-        //     id: clip.id,
-        //     text: clip.content.slice(0, 20),
-        //     action: async () => {
-        //       await writeText(clip.content);
-        //     },
-        //   });
-
-        //   return item;
-        // });
-
-        // const copiedItems = await Promise.all(copiedItemPromises);
-        // Create the menu action items
-        const monitorMenuItem = await MenuItem.new({
+        monitorItem = await MenuItem.new({
           id: "toggle_monitor",
           text: "Start Monitor",
           action: async () => {
-            const checkRunning = await isMonitorRunning();
-            if (checkRunning) {
-              await stopMonitor();
-            } else {
-              await startListening();
-            }
-          },
-        });
-        const quitMenuItem = await MenuItem.new({
-          id: "quit",
-          text: "Quit",
-          action: async () => {
-            const window = await getCurrentWindow();
-            if (trayRef.current) {
-              await trayRef.current.close();
-              trayRef.current = undefined;
-            }
-            window.destroy();
+            const running = await isMonitorRunning();
+            running ? await stopMonitor() : await startListening();
           },
         });
 
-        const reOpenItem = await MenuItem.new({
+        const reopenItem = await MenuItem.new({
           id: "reopen",
-          text: "Open",
+          text: "Open App",
           action: async () => {
-            const window = await getCurrentWindow();
-            // if (trayRef.current) {
-            //   await trayRef.current.close(); // Close the tray explicitly
-            //   trayRef.current = undefined;
-            // }
-            window.show();
-            window.setFocus();
+            const win = await getCurrentWindow();
+            win.show();
+            win.setFocus();
           },
         });
+
+        const quitItem = await MenuItem.new({
+          id: "quit",
+          text: "Quit",
+          action: async () => {
+            const win = await getCurrentWindow();
+            win.destroy();
+          },
+        });
+
+        const separator = await PredefinedMenuItem.new({ item: "Separator" });
 
         const menu = await Menu.new({
           items: [
             recentItem,
-            previousOne,
-            seperate,
-            monitorMenuItem,
-            reOpenItem,
-            quitMenuItem,
+            previousItem,
+            separator,
+            monitorItem,
+            reopenItem,
+            quitItem,
           ],
         });
 
-        await newTray.setMenu(menu);
+        await tray.setMenu(menu);
 
-        // Listen to monitor status updates and update the menu item text in real time
-        statusUnlisten = await listenToMonitorStatusUpdate((running) => {
-          monitorMenuItem.setText(running ? "Stop Monitor" : "Start Monitor");
-          newTray.setTooltip(
-            running ? "Monitoring is on" : "Monitoring is off"
-          );
+        // Monitor status updates
+        await listenToMonitorStatusUpdate((running) => {
+          monitorItem?.setText(running ? "Stop Monitor" : "Start Monitor");
+          tray?.setTooltip(running ? "Monitoring is on" : "Monitoring is off");
         });
-      } catch (e) {
-        console.error("Could not set up tray menu handlers", e);
+      } catch (err) {
+        console.error("Tray Setup Error:", err);
       }
     };
 
     setupTray();
+  }, []);
 
-    // The cleanup function for useEffect
-    return () => {
-      if (statusUnlisten) {
-        statusUnlisten(); // Clean up the listener
-      }
-      // CRITICAL: Close the tray icon on component unmount
-      if (trayRef.current) {
-        // We can safely close it here when the React component instance is being destroyed.
-        trayRef.current.close();
-        trayRef.current = undefined;
-      }
-    };
-  }, []); // Empty dependency array ensures this runs once per component mount/unmount cycle
+  // -----------------------------------------------------
+  // 🔥 Update menu item text when clipboard changes
+  // -----------------------------------------------------
+  useEffect(() => {
+    if (!recentItem || !previousItem) return;
+
+    if (mostRecentItems[0]) {
+      // recentItem.setText(mostRecentItems[0].content.slice(0, 20));
+    }
+
+    if (mostRecentItems[1]) {
+      // previousItem.setText(mostRecentItems[1].content.slice(0, 20));
+    }
+  }, [mostRecentItems]);
 
   return null;
 };

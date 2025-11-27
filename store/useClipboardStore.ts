@@ -55,8 +55,8 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     set({ count: count[0] });
   },
   fetchItems: async () => {
-    await get().applyFilters();
-    await get().getMostRecentItems();
+    get().applyFilters();
+    get().getMostRecentItems();
   },
   applyFilters: async () => {
     const { filterType, searchQuery, sortByDesc, filterDate } = get();
@@ -102,7 +102,6 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     }
 
     const rows = await db.select(query, params);
-
     set({ items: rows });
     await get().findCountedItems();
   },
@@ -125,13 +124,12 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       toast("Clip created!", {
         description: "Your new clip has been added successfully.",
       });
-      return;
+      get().applyFilters();
+      await get().getMostRecentItems();
+      await get().findCountedItems();
     } catch (error) {
       toast.error("Clipboard is accept duplicate text.");
     }
-    await get().applyFilters();
-    await get().getMostRecentItems();
-    await get().findCountedItems();
   },
   deleteItem: async (id) => {
     try {
@@ -185,11 +183,11 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     const db = await getDB();
 
     const items = await db.select(
-      "SELECT * FROM clipboards  ORDER BY createdAt DESC LIMIT 4"
+      "SELECT * FROM clipboards  ORDER BY createdAt DESC LIMIT 2"
     );
 
     set({ mostRecentItems: items });
-  },  
+  },
 }));
 
 // {

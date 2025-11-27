@@ -8,7 +8,6 @@ import {
   onTextUpdate,
   startListening,
   stopMonitor,
-
 } from "tauri-plugin-clipboard-api";
 import { useClipboardStore } from "@/store/useClipboardStore";
 
@@ -20,29 +19,21 @@ export const useMonitor = () => {
     let clipboardUnlisten: UnlistenFn;
     let statusUnlisten: UnlistenFn;
 
-    const setupSubscriptions = async () => {
-
+    const setupClipboards = async () => {
       const checkRunning = await isMonitorRunning();
-      setIsRunning(checkRunning)
+      setIsRunning(checkRunning);
 
       clipboardUnlisten = await onTextUpdate((text) => {
         addItem({ content: text });
-          console.log("it's from monitoring")
-
       });
 
-     
       statusUnlisten = await listenToMonitorStatusUpdate((running) => {
         setIsRunning(running);
       });
     };
 
-    // const checkMonitorRunning = async () => {
 
-    // }
-
-
-    setupSubscriptions();
+    setupClipboards();
 
     return () => {
       if (clipboardUnlisten) {
@@ -53,7 +44,6 @@ export const useMonitor = () => {
       }
     };
   }, []);
-
 
   const handleStartListen = async () => {
     const rn = await isMonitorRunning();
@@ -72,3 +62,4 @@ export const useMonitor = () => {
     handleStopListen,
   };
 };
+
