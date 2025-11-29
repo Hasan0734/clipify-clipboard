@@ -36,7 +36,7 @@ const FullViewContent = ({ data }: { data: ClipboardItem }) => {
         </button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="bg-card">
         <DialogTitle>
           <div className="flex items-center gap-2">
             <div className="p-2 bg-primary/10 rounded-lg">
@@ -46,7 +46,7 @@ const FullViewContent = ({ data }: { data: ClipboardItem }) => {
           </div>
         </DialogTitle>
 
-        <div className="min-h-32 max-h-82 overflow-scroll">
+        <div className="min-h-32 max-h-82 overflow-y-auto">
           {data.type === "text" ? (
             <p className="dark:text-gray-400 text-base ">
               {data.content}

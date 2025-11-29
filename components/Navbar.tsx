@@ -73,7 +73,7 @@ const Navbar = () => {
               <span className="hidden sm:inline">New Clip</span>
             </Button>
             <ThemeToggle />
-            <Button variant={"outline"} onClick={() => setScreen("lock")} size={"icon-sm"}>
+            <Button variant={"ghost"} onClick={() => setScreen("lock")} size={"icon-sm"}>
               <Lock />
             </Button>
           </div>

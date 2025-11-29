@@ -111,7 +111,7 @@ export const useAnalytics = create<AnalyticsStore>((set, get) => ({
         SUM(CASE WHEN type = 'text' THEN 1 ELSE 0 END) as text,
         SUM(CASE WHEN type = 'link' THEN 1 ELSE 0 END) as link
        FROM clipboards
-       WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now')
+       WHERE DATE(createdAt / 1000, 'unixepoch') >= DATE('now', '-7 days')
        GROUP BY DATE(createdAt / 1000, 'unixepoch')
        ORDER BY DATE(createdAt / 1000, 'unixepoch')`);
       

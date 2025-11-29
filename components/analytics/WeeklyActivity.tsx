@@ -35,11 +35,11 @@ const activityData = [
 const chartConfig = {
   text: {
     label: "Text",
-    color: "var(--chart-1)",
+    color: "var(--chart-3)",
   },
   link: {
     label: "Link",
-    color: "var(--chart-2)",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 

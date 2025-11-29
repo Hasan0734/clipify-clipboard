@@ -118,12 +118,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   return (
                     <SidebarMenuItem key={item.id}>
                       <SidebarMenuButton
-                        size={"lg"}
                         onClick={() => {
                           handleFilter(item.id);
                         }}
                         isActive={active}
-                        className={"rounded-md  cursor-pointer w-full  h-9"}
+                        className={"rounded-md  cursor-pointer w-full"}
                       >
                         {<item.icon />}
                         <div className={"grow flex justify-between "}>

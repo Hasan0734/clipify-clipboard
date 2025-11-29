@@ -19,9 +19,7 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import { ClipboardItem } from "@/lib/types";
 import { formatDistance } from "date-fns";
-import {
-  writeText,
-} from "tauri-plugin-clipboard-api";
+import { writeText } from "tauri-plugin-clipboard-api";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useClipboardStore } from "@/store/useClipboardStore";
 import { cn } from "@/lib/utils";
@@ -59,7 +57,6 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
     <Card
       className={cn(
         "@container/card rounded-xl shadow-xl hover:shadow-2xl p-3 gap-0 w-full "
-     
       )}
     >
       <CardHeader className="p-0">
@@ -86,9 +83,12 @@ const ClipboardCard = ({ data }: { data: ClipboardItem }) => {
             </button>
 
             <FullViewContent data={data} />
-            <Button variant={'outline'} size={'icon-sm'} onClick={handleDelete}>
-              <Trash2 />
-            </Button>
+            <button
+              className="p-1 rounded-lg hover:bg-accent/50 transition-colors"
+              onClick={handleDelete}
+            >
+              <Trash2 className="w-5 h-5 transition-colors"/>
+            </button>
 
             {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
