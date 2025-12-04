@@ -14,97 +14,129 @@ type COUNT = {
 
 type ClipboardStore = {
   items: ClipboardItem[];
+  mostRecentItems: ClipboardItem[];
+
   filterType: string;
   searchQuery: string;
   sortByDesc: boolean;
   filterDate: Date | undefined;
-  fetchItems: () => Promise<void>;
+
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+
+  resetPagination: () => void;
+
+  fetchItems: (isLoadMore?: boolean) => Promise<void>;
+  applyFilters: (isLoadMore?: boolean) => Promise<void>;
+
   addItem: (dat: Partial<ClipboardItem>) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   toggleFavorite: (id: string) => Promise<void>;
   clearAll: () => Promise<void>;
+
   handleFilter: (type: string) => void;
   handleSearch: (query: string) => void;
-  applyFilters: () => void;
-  findCountedItems: () => Promise<void>;
   handleSorting: () => Promise<void>;
   handleFilterByDate: (date: Date | undefined) => Promise<void>;
+
   getMostRecentItems: () => Promise<void>;
-  mostRecentItems: ClipboardItem[];
+  findCountedItems: () => Promise<void>;
+
   count: COUNT | undefined;
 };
 
 export const useClipboardStore = create<ClipboardStore>((set, get) => ({
   items: [],
+  mostRecentItems: [],
+
   filterType: "all",
   searchQuery: "",
   sortByDesc: true,
   filterDate: undefined,
-  mostRecentItems: [],
-  count: { total: 0, totalLink: 0, totalText: 0, totalFavorite: 0 },
-  findCountedItems: async () => {
-    const db = await getDB();
-    const count = await db.select(
-      `SELECT COUNT(*) as total, 
-      COUNT(CASE WHEN type = 'text' THEN 1 END) AS totalText,
-      COUNT(CASE WHEN type = 'link' THEN 1 END) AS totalLink,
-      COUNT(CASE WHEN isFavorite = 1 THEN 1 END) AS totalFavorite
-      FROM clipboards`
-    );
 
-    set({ count: count[0] });
+  limit: 50,
+  offset: 0,
+  hasMore: true,
+
+  count: { total: 0, totalLink: 0, totalText: 0, totalFavorite: 0 },
+
+  // RESET pagination when filters change
+  resetPagination: () => set({ offset: 0, hasMore: true, items: [] }),
+
+  // MAIN LOAD FUNCTION
+  fetchItems: async (isLoadMore = false) => {
+    await get().applyFilters(isLoadMore);
+    await get().getMostRecentItems();
   },
-  fetchItems: async () => {
-    get().applyFilters();
-    get().getMostRecentItems();
-  },
-  applyFilters: async () => {
-    const { filterType, searchQuery, sortByDesc, filterDate } = get();
+
+  // FULL FILTERING + PAGINATION
+  applyFilters: async (isLoadMore = false) => {
+    const { filterType, searchQuery, sortByDesc, filterDate, limit } = get();
+    let { offset, items } = get();
+
     const db = await getDB();
 
     let query = "SELECT * FROM clipboards";
     const params: any[] = [];
-    let whereAdded = false; // Flag to track if WHERE clause has been added
+    const where = [];
 
-    // Helper function to correctly add WHERE or AND
-    const addCondition = (condition: string) => {
-      if (!whereAdded) {
-        query += " WHERE";
-        whereAdded = true;
-      }
-      query += " " + condition;
-    };
-
+    // Type filter
     if (filterType && filterType !== "all" && filterType !== "favorite") {
-      addCondition("type = ?");
+      where.push("type = ?");
       params.push(filterType);
     }
+
+    // Favorite filter
     if (filterType === "favorite") {
-      addCondition("isFavorite = 1");
+      where.push("isFavorite = 1");
     }
 
+    // Date filter
     if (filterDate) {
-      const timestamps = filterDate.getTime();
-      addCondition(
-        `createdAt >= ${timestamps} AND createdAt < ${timestamps + 86400000}`
-      );
+      const ts = filterDate.getTime();
+      where.push("createdAt >= ? AND createdAt < ?");
+      params.push(ts, ts + 86400000);
     }
 
+    // Search filter
     if (searchQuery) {
-      addCondition(` AND "content" LIKE ?`);
+      where.push("content LIKE ?");
       params.push(`%${searchQuery}%`);
     }
 
-    if (sortByDesc) {
-      query += " ORDER BY createdAt DESC";
-    } else {
-      query += " ORDER BY createdAt ASC";
+    // WHERE clause
+    if (where.length > 0) {
+      query += " WHERE " + where.join(" AND ");
     }
 
+    // Sorting
+    query += ` ORDER BY createdAt ${sortByDesc ? "DESC" : "ASC"}`;
+
+    // Pagination
+    query += " LIMIT ? OFFSET ?";
+    params.push(limit, offset);
+
+    // Execute
     const rows = await db.select(query, params);
-    set({ items: rows });
+
+    // Append or reset items
+    if (isLoadMore) {
+      items = [...items, ...rows];
+    } else {
+      items = rows;
+    }
+
+    set({
+      items,
+      offset: offset + limit,
+      hasMore: rows.length === limit,
+    });
+
     await get().findCountedItems();
   },
+
+  // ADD ITEM
   addItem: async (data) => {
     try {
       const db = await getDB();
@@ -121,28 +153,32 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
         "INSERT INTO clipboards (id, content, type, isFavorite, createdAt) VALUES (?, ?, ?, ?, ?)",
         [id, data.content, data.type ?? "text", isFavorite, createdAt]
       );
-      toast("Clip created!", {
-        description: "Your new clip has been added successfully.",
-      });
-      get().applyFilters();
-      await get().getMostRecentItems();
-      await get().findCountedItems();
+
+      toast("Clip created!");
+
+      get().resetPagination();
+      await get().fetchItems();
     } catch (error) {
-      toast.error("Clipboard is accept duplicate text.");
+      toast.error("Clipboard does not accept duplicate text.");
     }
   },
+
+  // DELETE ITEM
   deleteItem: async (id) => {
     try {
       const db = await getDB();
-
       await db.execute("DELETE FROM clipboards WHERE id = ?", [id]);
-      await get().applyFilters();
-      await get().findCountedItems();
-      toast.success("Successfully Deleted");
+
+      get().resetPagination();
+      await get().fetchItems();
+
+      toast.success("Successfully deleted.");
     } catch (error) {
-      toast.error("Delete item not found.");
+      toast.error("Item not found.");
     }
   },
+
+  // TOGGLE FAVORITE
   toggleFavorite: async (id) => {
     const db = await getDB();
     await db.execute(
@@ -150,51 +186,64 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
       [id]
     );
 
-    await get().applyFilters();
-    await get().findCountedItems();
+    get().resetPagination();
+    await get().fetchItems();
   },
+
   clearAll: async () => {
     const db = await getDB();
     await db.execute("DELETE FROM clipboards");
-    set(() => ({ items: [] }));
+
+    set({ items: [] });
+
     await get().findCountedItems();
-    toast("Cleared all of clipboard data.");
+    toast("Cleared all clipboard data.");
   },
+
+  // FILTER HANDLERS
   handleFilter: (type) => {
     set({ filterType: type });
-    get().applyFilters();
+    get().resetPagination();
+    get().fetchItems();
   },
+
   handleSearch: (query) => {
     set({ searchQuery: query });
-    get().applyFilters();
+    get().resetPagination();
+    get().fetchItems();
   },
 
   handleSorting: async () => {
     set((state) => ({ sortByDesc: !state.sortByDesc }));
-    get().applyFilters();
+    get().resetPagination();
+    get().fetchItems();
   },
+
   handleFilterByDate: async (date) => {
     set({ filterDate: date });
-    get().applyFilters();
-    await get().findCountedItems();
+    get().resetPagination();
+    get().fetchItems();
   },
 
+  // MOST RECENT ITEMS
   getMostRecentItems: async () => {
     const db = await getDB();
-
     const items = await db.select(
-      "SELECT * FROM clipboards  ORDER BY createdAt DESC LIMIT 2"
+      "SELECT * FROM clipboards ORDER BY createdAt DESC LIMIT 2"
     );
-
     set({ mostRecentItems: items });
   },
-}));
 
-// {
-//         "title": "Clipboard Manager",
-//         "width": 1200,
-//         "height": 800,
-//         "resizable": true,
-//         "fullscreen": false,
-//         "decorations": false
-//       }
+  // COUNTS
+  findCountedItems: async () => {
+    const db = await getDB();
+    const count = await db.select(
+      `SELECT COUNT(*) as total, 
+      COUNT(CASE WHEN type = 'text' THEN 1 END) AS totalText,
+      COUNT(CASE WHEN type = 'link' THEN 1 END) AS totalLink,
+      COUNT(CASE WHEN isFavorite = 1 THEN 1 END) AS totalFavorite
+      FROM clipboards`
+    );
+    set({ count: count[0] });
+  },
+}));

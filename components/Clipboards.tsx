@@ -1,15 +1,30 @@
 "use client";
-import  { useEffect } from "react";
+
+import { useEffect } from "react";
 import ClipboardCard from "./ClipboardCard";
-import {  Clipboard } from "lucide-react";
+import { ClipboardItem } from "@/lib/types";
+import { Clipboard } from "lucide-react";
 import { useClipboardStore } from "@/store/useClipboardStore";
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
 const Clipboards = () => {
   const { items, fetchItems } = useClipboardStore((st) => st);
 
+  const { isIntersecting, ref } = useIntersectionObserver({
+    threshold: 0.5,
+
+    freezeOnceVisible: false,
+  });
+
   useEffect(() => {
-    fetchItems();
-  }, []);
+    if (isIntersecting) {
+      fetchItems(true);
+    }
+  }, [isIntersecting]);
+
+  // useEffect(() => {
+  //   fetchItems();
+  // }, []);
 
   return (
     <div className="px-4 lg:px-6">
@@ -19,12 +34,14 @@ const Clipboards = () => {
         ) : (
           <div className="flex items-center flex-col gap-6 col-span-full row-span-16 text-center justify-center">
             <Clipboard size={50} />
+
             <div>No clipboard data. Enable monitoring to auto-save.</div>
           </div>
         )}
       </div>
+
+      <div ref={ref}></div>
     </div>
   );
 };
-
 export default Clipboards;
